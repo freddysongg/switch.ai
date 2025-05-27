@@ -1,54 +1,63 @@
-# React + TypeScript + Vite
+# switch.ai | Mechanical Keyboard Switch Assistant
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![switch.ai Logo](assets/icons/switch.ai%20v2%20Logo.png)
 
-Currently, two official plugins are available:
+switch.ai is a web-based application designed to help users discover and choose the perfect mechanical keyboard switches based on their preferences. It features an interactive assistant to guide users through the selection process.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## Expanding the ESLint configuration
+*   Interactive chat interface for a personalized experience.
+*   Intelligent assistant to help select mechanical keyboard switches.
+*   Themeable UI with light and dark modes.
+*   Built with a modern tech stack for a responsive and fast experience.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech Stack
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+*   React
+*   TypeScript
+*   Vite
+*   Tailwind CSS
+*   Radix UI (for UI components)
+*   PNPM (for package management)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Getting Started
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerequisites
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+*   Node.js (LTS version recommended)
+*   pnpm (Package manager - can be installed via `npm install -g pnpm`)
+
+### Installation
+
+1.  Clone the repository: `git clone https://github.com/freddysongg/switchai.git`
+2.  Navigate to the project directory: `cd switchai`
+3.  Install dependencies: `pnpm install`
+
+### Running in Development Mode
+
+To start the development server, run: `pnpm dev`
+Open your browser and navigate to `http://localhost:5173` (or the port specified in your Vite config if different).
+
+### Building for Production
+
+To create a production build, run: `pnpm build`
+The optimized static assets will be generated in the `dist` folder.
+
+## Available Scripts
+
+*   `pnpm dev`: Runs the app in development mode.
+*   `pnpm build`: Builds the app for production.
+*   `pnpm lint`: Lints the codebase using ESLint.
+*   `pnpm preview`: Serves the production build locally for preview.
+*   `pnpm format`: Formats code using Prettier.
+*   `pnpm format:check`: Checks code formatting with Prettier without making changes.
+
+## Linting and Formatting
+
+This project uses ESLint for linting and Prettier for code formatting. Configuration files are included in the repository.
+To check for linting issues, run: `pnpm lint`
+To automatically format files, run: `pnpm format`
+
+## License
+
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.

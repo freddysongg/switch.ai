@@ -1,169 +1,245 @@
-import { useEffect, useRef, useState } from 'react'
-import { ChatHeader } from './ChatHeader.js'
-import { ChatInput } from './ChatInput.js'
-import { ChatMessage } from './ChatMessage.js'
-import { ConversationSidebar } from './ConversationSidebar.js'
-import { Message, Conversation } from '@/types.js'
-import { ScrollArea } from '@/components/ui/scroll-area.js'
-import { Loader2 } from 'lucide-react'
+import { ScrollArea } from '@/components/ui/scroll-area.js';
+import { mockMessages } from '@/data/mockMessages';
+import { Conversation } from '@/types.js';
+import { Loader2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
+import { ChatMessage as ChatMessageType } from '@/types/chat';
+
+import { ChatHeader } from './ChatHeader.js';
+import { ChatInput } from './ChatInput.js';
+import { ChatMessage } from './ChatMessage.js';
+import { ConversationSidebar } from './ConversationSidebar.js';
+import { WelcomePage } from './WelcomePage.js';
 
 export function ChatInterface() {
-    const [conversations, setConversations] = useState<Conversation[]>([])
-    const [currentConversationId, setCurrentConversationId] = useState<
-        string | null
-    >(null)
-    const [messages, setMessages] = useState<Message[]>([])
-    const [isLoading, setIsLoading] = useState(false)
-    const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessageType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Mock conversation data
-    useEffect(() => {
-        const mockConversations: Conversation[] = [
-            { id: '1', title: 'Linear vs Tactile Switches' },
-            { id: '2', title: 'Best Silent Switches' },
-            { id: '3', title: 'Cherry MX Red Alternatives' },
-        ]
-        setConversations(mockConversations)
+  useEffect(() => {
+    const conversationGroups: { [key: string]: ChatMessageType[] } = {};
+    let currentGroup = '';
 
-        // Initialize with welcome message
-        const welcomeMessage: Message = {
-            id: 'welcome',
-            content:
-                "Hello! I'm switch.ai, ask me anything about mechanical keyboard switches.",
-            sender: 'assistant',
-            timestamp: new Date().toISOString(),
-        }
-        setMessages([welcomeMessage])
-    }, [])
+    mockMessages.forEach((msg) => {
+      if (msg.role === 'user') {
+        currentGroup = msg.id;
+        conversationGroups[currentGroup] = [];
+      }
+      if (currentGroup) {
+        conversationGroups[currentGroup].push(msg);
+      }
+    });
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const convList = Object.entries(conversationGroups).map(([id, messages]) => ({
+      id,
+      title: messages[0].content.slice(0, 50) + (messages[0].content.length > 50 ? '...' : '')
+    }));
+
+    setConversations(convList);
+  }, []);
+
+  useEffect(() => {
+    if (!currentConversationId) {
+      setMessages([]);
+      return;
     }
 
-    useEffect(() => {
-        scrollToBottom()
-    }, [messages])
+    let foundStart = false;
+    const conversationMessages = mockMessages.filter((msg) => {
+      if (msg.id === currentConversationId) {
+        foundStart = true;
+        return true;
+      }
+      if (!foundStart) return false;
+      if (msg.role === 'user' && msg.id !== currentConversationId) {
+        foundStart = false;
+        return false;
+      }
+      return foundStart;
+    });
 
-    const handleSendMessage = (content: string) => {
-        // Add user message to the chat
-        const userMessage: Message = {
-            id: `user-${Date.now()}`,
-            content,
-            sender: 'user',
-            timestamp: new Date().toISOString(),
-        }
-        setMessages((prev) => [...prev, userMessage])
+    setMessages(conversationMessages);
+  }, [currentConversationId]);
 
-        // Simulate AI response
-        setIsLoading(true)
-        setTimeout(() => {
-            // For demo, create a mock response based on the query
-            let responseContent = ''
-            if (content.toLowerCase().includes('linear')) {
-                responseContent =
-                    "Linear switches have a smooth keystroke without any tactile bump or click. Popular examples include Cherry MX Red, Gateron Yellow, and Novelkey Cream switches. They're often preferred for gaming due to their faster actuation and smoother keypress."
-            } else if (content.toLowerCase().includes('tactile')) {
-                responseContent =
-                    "Tactile switches provide a noticeable bump during keypress, giving physical feedback without being as loud as clicky switches. Examples include Cherry MX Browns, Zealios V2, and Holy Pandas. They're popular for typing and offer a good balance between gaming and typing performance."
-            } else if (content.toLowerCase().includes('silent')) {
-                responseContent =
-                    'Silent switches are designed to minimize noise during typing. Options like Silent Alpacas, Zilent V2, and Cherry MX Silent Red use special dampeners to reduce bottom-out and top-out noise, making them great for office environments or late-night typing sessions.'
-            } else {
-                responseContent =
-                    "I'd be happy to help with your question about mechanical keyboard switches. Could you provide a bit more detail about what specific switch characteristics you're interested in? For example, are you looking for information about switch types, feel, sound profiles, or specific brands?"
-            }
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
-            const botMessage: Message = {
-                id: `assistant-${Date.now()}`,
-                content: responseContent,
-                sender: 'assistant',
-                timestamp: new Date().toISOString(),
-            }
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-            setMessages((prev) => [...prev, botMessage])
-            setIsLoading(false)
-        }, 1500)
+  const handleSelectConversation = (id: string) => {
+    setCurrentConversationId(id);
+    let foundStart = false;
+    const conversationMessages = mockMessages.filter((msg) => {
+      if (msg.id === id) {
+        foundStart = true;
+        return true;
+      }
+      if (!foundStart) return false;
+      if (msg.role === 'user' && msg.id !== id) {
+        foundStart = false;
+        return false;
+      }
+      return foundStart;
+    });
+
+    setMessages(conversationMessages);
+    setHasInteracted(true);
+  };
+
+  const handleNewConversation = () => {
+    const newId = `conv-${Date.now()}`;
+    const newConversation: Conversation = {
+      id: newId,
+      title: 'new chat'
+    };
+    setConversations((prev) => [newConversation, ...prev]);
+    setCurrentConversationId(newId);
+    setMessages([]);
+    setHasInteracted(false);
+  };
+
+  const handleSendMessage = (content: string) => {
+    setHasInteracted(true);
+
+    const userMessage: ChatMessageType = {
+      id: `user-${Date.now()}`,
+      content,
+      role: 'user',
+      timestamp: new Date().toISOString(),
+      category: 'general'
+    };
+    setMessages((prev) => [...prev, userMessage]);
+
+    if (messages.length === 0) {
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === currentConversationId
+            ? { ...conv, title: content.slice(0, 50) + (content.length > 50 ? '...' : '') }
+            : conv
+        )
+      );
     }
 
-    const handleSelectConversation = (id: string) => {
-        setCurrentConversationId(id)
-        const selectedConvo = conversations.find((c) => c.id === id)
+    setIsLoading(true);
+    setTimeout(() => {
+      let responseMessage: ChatMessageType | undefined;
 
-        if (selectedConvo) {
-            // Mock loading conversation messages
-            setMessages([
-                {
-                    id: 'convo-start',
-                    content: `This is the beginning of your conversation about "${selectedConvo.title}"`,
-                    sender: 'assistant',
-                    timestamp: new Date().toISOString(),
-                },
-            ])
-        }
+      if (content.toLowerCase().includes('compare') && content.toLowerCase().includes('brown')) {
+        responseMessage = mockMessages.find(
+          (msg) => msg.category === 'switch_comparison' && msg.role === 'assistant'
+        );
+      } else if (content.toLowerCase().includes('typing experience')) {
+        responseMessage = mockMessages.find(
+          (msg) => msg.content.includes('typing experience') && msg.role === 'assistant'
+        );
+      } else if (content.toLowerCase().includes('office')) {
+        responseMessage = mockMessages.find(
+          (msg) => msg.content.includes('office use') && msg.role === 'assistant'
+        );
+      }
+
+      if (!responseMessage) {
+        responseMessage = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          timestamp: new Date().toISOString(),
+          category: 'general',
+          content:
+            "I'd be happy to help with your question about mechanical keyboard switches. Could you please be more specific about what you'd like to know?"
+        };
+      }
+
+      const finalResponse = {
+        ...responseMessage,
+        id: `assistant-${Date.now()}`,
+        timestamp: new Date().toISOString()
+      };
+
+      setMessages((prev) => [...prev, finalResponse]);
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  const handleDeleteConversation = (id: string) => {
+    setConversations((prev) => prev.filter((conv) => conv.id !== id));
+    if (id === currentConversationId) {
+      const remainingConversations = conversations.filter((conv) => conv.id !== id);
+      if (remainingConversations.length > 0) {
+        setCurrentConversationId(remainingConversations[0].id);
+        setMessages(
+          mockMessages.filter((msg) => {
+            return msg.id === remainingConversations[0].id || msg.role === 'assistant';
+          })
+        );
+      } else {
+        setCurrentConversationId(null);
+        setMessages([]);
+        setHasInteracted(false);
+      }
     }
+  };
 
-    const handleNewConversation = () => {
-        const newId = `new-${Date.now()}`
-        const newConversation: Conversation = {
-            id: newId,
-            title: 'New Conversation',
-        }
+  const handleResetState = () => {
+    setCurrentConversationId(null);
+    setMessages([]);
+    setHasInteracted(false);
+  };
 
-        setConversations((prev) => [newConversation, ...prev])
-        setCurrentConversationId(newId)
-        setMessages([
-            {
-                id: 'new-welcome',
-                content:
-                    "Hello! I'm switch.ai, ask me anything about mechanical keyboard switches.",
-                sender: 'assistant',
-                timestamp: new Date().toISOString(),
-            },
-        ])
-    }
+  return (
+    <div className="flex h-screen dark:bg-background">
+      <ConversationSidebar
+        conversations={conversations}
+        currentConversationId={currentConversationId}
+        onSelectConversation={handleSelectConversation}
+        onNewConversation={handleNewConversation}
+        onDeleteConversation={handleDeleteConversation}
+      />
 
-    return (
-        <div className="flex h-full flex-col md:flex-row">
-            <ConversationSidebar
-                conversations={conversations}
-                currentConversationId={currentConversationId}
-                onSelectConversation={handleSelectConversation}
-                onNewConversation={handleNewConversation}
-            />
+      <main className="flex flex-1 flex-col overflow-hidden">
+        <ChatHeader onReset={handleResetState} />
 
-            <div className="flex flex-1 flex-col h-full">
-                <ChatHeader />
+        <div className="relative flex flex-1 flex-col overflow-hidden bg-muted/50">
+          {!hasInteracted ? (
+            <WelcomePage onSendMessage={handleSendMessage} isLoading={isLoading} />
+          ) : (
+            <ScrollArea className="flex-1 px-4">
+              <div className="container max-w-4xl mx-auto">
+                {messages.map((message, index) => (
+                  <ChatMessage
+                    key={message.id}
+                    message={message}
+                    isLastMessage={index === messages.length - 1}
+                  />
+                ))}
+                {isLoading && (
+                  <div className="flex justify-start py-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+          )}
 
-                <ScrollArea className="flex-1 p-4">
-                    <div className="max-w-3xl mx-auto">
-                        {messages.map((message, i) => (
-                            <ChatMessage
-                                key={message.id}
-                                message={message}
-                                isLastMessage={i === messages.length - 1}
-                            />
-                        ))}
-
-                        {isLoading && (
-                            <div className="flex items-center justify-start gap-2 py-4">
-                                <div className="h-8 w-8 flex items-center justify-center bg-muted rounded-full">
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                </div>
-                                <div className="rounded-lg px-4 py-2 bg-muted text-muted-foreground">
-                                    switch.ai is typing...
-                                </div>
-                            </div>
-                        )}
-
-                        <div ref={messagesEndRef} />
-                    </div>
-                </ScrollArea>
-
-                <ChatInput
-                    onSendMessage={handleSendMessage}
-                    isLoading={isLoading}
-                />
+          {hasInteracted && (
+            <div className="bg-background p-4">
+              <div className="container max-w-4xl mx-auto space-y-2">
+                <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+                <p className="text-xs text-center text-muted-foreground">
+                  for educational purposes :D
+                </p>
+              </div>
             </div>
+          )}
         </div>
-    )
+      </main>
+    </div>
+  );
 }

@@ -1,6 +1,23 @@
 {
-  "trailingComma": "es5",
-  "tabWidth": 4,
-  "semi": false,
-  "singleQuote": true
+  "semi": true,
+  "trailingComma": "none",
+  "singleQuote": true,
+  "printWidth": 100,
+  "tabWidth": 2,
+  "importOrder": [
+    "^(fastify/(.*)$)|^(fastify$)",
+    "<THIRD_PARTY_MODULES>",
+    "",
+    "^@/lib/(.*)$",
+    "^@/utils/(.*)$",
+    "^@/plugins/(.*)$",
+    "^@/services/(.*)$",
+    "",
+    "^@/types/(.*)$",
+    "",
+    "^@/constants/(.*)$",
+    "",
+    "^[./]"
+  ],
+  "plugins": ["@ianvs/prettier-plugin-sort-imports"]
 }
