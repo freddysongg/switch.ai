@@ -2,11 +2,12 @@ import { Button } from '@/components/ui/button.js';
 import { ScrollArea } from '@/components/ui/scroll-area.js';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet.js';
 import { useIsMobile } from '@/hooks/use-mobile.js';
-import { Conversation } from '@/types.js';
 import { ChevronLeft, MessageSquare, PlusCircle, Trash2, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { cn } from '@/lib/utils.js';
+
+import { Conversation } from '@/types/chat';
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -118,8 +119,8 @@ function ConversationList({
                 <div
                   className={cn(
                     'rounded-md p-1 transition-colors relative group/icon',
-                    conversation.id === currentConversationId 
-                      ? '' 
+                    conversation.id === currentConversationId
+                      ? ''
                       : 'hover:bg-primary/10 hover:text-primary dark:hover:bg-white/20 dark:hover:text-white/90'
                   )}
                 >

@@ -1,4 +1,23 @@
-export type SwitchComparison = {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  category?: string;
+  timestamp?: string;
+  createdAt?: Date;
+  metadata?: Record<string, any>;
+  comparison?: {
+    switch1: SwitchDetails;
+    switch2: SwitchDetails;
+    switch3?: SwitchDetails;
+    switch4?: SwitchDetails;
+    switch5?: SwitchDetails;
+  };
+  analysis?: string;
+}
+
+export interface SwitchDetails {
   name: string;
   brand: string;
   actuation_weight: string;
@@ -9,18 +28,20 @@ export type SwitchComparison = {
   stem_material: string;
   housing_material: string;
   lubed_status: string;
-};
+}
 
-export type MessageCategory = 'general' | 'switch_comparison' | 'keyboard_recommendation';
-
-export type ChatMessage = {
+export interface Conversation {
   id: string;
-  role: 'user' | 'assistant';
+  userId: string;
+  title?: string;
+  category?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ChatResponse {
+  id: string;
+  role: 'assistant';
   content: string;
-  category?: MessageCategory;
-  comparison?: {
-    [key: `switch${number}`]: SwitchComparison;
-  };
-  analysis?: string;
-  timestamp: string;
-};
+  metadata?: Record<string, any>;
+}

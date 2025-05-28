@@ -1,5 +1,6 @@
 import { ChatInterface } from './components/chat/ChatInterface.js';
 import { ThemeProvider } from './components/ThemeProvider.js';
+import { Toaster } from './components/ui/toaster';
 
 import './App.css';
 
@@ -8,6 +9,7 @@ function App() {
     <ThemeProvider defaultTheme="light" storageKey="switch-ai-theme">
       <div className="h-full w-full">
         <ChatInterface />
+        <Toaster />
       </div>
     </ThemeProvider>
   );

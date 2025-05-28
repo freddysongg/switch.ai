@@ -10,8 +10,8 @@ interface WelcomePageProps {
 
 export function WelcomePage({ onSendMessage, isLoading }: WelcomePageProps) {
   const [displayContent, setDisplayContent] = useState('');
-  const text = "gpt, but for switches...";
-  
+  const text = 'gpt, but for switches...';
+
   useEffect(() => {
     let currentIndex = 0;
     const typingInterval = setInterval(() => {
@@ -21,7 +21,7 @@ export function WelcomePage({ onSendMessage, isLoading }: WelcomePageProps) {
       } else {
         clearInterval(typingInterval);
       }
-    }, 50); // Slowed down typing speed for better effect
+    }, 50);
 
     return () => clearInterval(typingInterval);
   }, []);

@@ -1,10 +1,12 @@
 import { ScrollArea } from '@/components/ui/scroll-area.js';
+import { useToast } from '@/components/ui/use-toast.js';
 import { mockMessages } from '@/data/mockMessages';
-import { Conversation } from '@/types.js';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { ChatMessage as ChatMessageType } from '@/types/chat';
+import { chatApi } from '@/lib/api';
+
+import { ChatMessage as ChatMessageType, Conversation } from '@/types/chat';
 
 import { ChatHeader } from './ChatHeader.js';
 import { ChatInput } from './ChatInput.js';
@@ -12,58 +14,141 @@ import { ChatMessage } from './ChatMessage.js';
 import { ConversationSidebar } from './ConversationSidebar.js';
 import { WelcomePage } from './WelcomePage.js';
 
+const DEMO_CONVERSATIONS = mockMessages.slice(0, 4);
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
 export function ChatInterface() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [isDemo, setIsDemo] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
+  // Retry logic for API calls
+  const retryApiCall = useCallback(
+    async <T,>(apiCall: () => Promise<T>, retries = MAX_RETRIES): Promise<T> => {
+      try {
+        return await apiCall();
+      } catch (error) {
+        if (retries > 0) {
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+          return retryApiCall(apiCall, retries - 1);
+        }
+        throw error;
+      }
+    },
+    []
+  );
+
+  // Load conversations from API
   useEffect(() => {
-    const conversationGroups: { [key: string]: ChatMessageType[] } = {};
-    let currentGroup = '';
+    const loadConversations = async () => {
+      try {
+        setError(null);
+        const apiConversations = await retryApiCall(() => chatApi.listConversations());
 
-    mockMessages.forEach((msg) => {
-      if (msg.role === 'user') {
-        currentGroup = msg.id;
-        conversationGroups[currentGroup] = [];
+        // Create demo conversations
+        const demoConvs = DEMO_CONVERSATIONS.reduce((acc: Conversation[], msg) => {
+          if (msg.role === 'user') {
+            acc.push({
+              id: msg.id,
+              title: msg.content.slice(0, 50) + (msg.content.length > 50 ? '...' : ''),
+              userId: 'demo',
+              category: 'demo',
+              createdAt: new Date(msg.timestamp || Date.now()),
+              updatedAt: new Date(msg.timestamp || Date.now())
+            });
+          }
+          return acc;
+        }, []);
+
+        setConversations([...demoConvs, ...apiConversations]);
+      } catch (error) {
+        console.error('Error loading conversations:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to load conversations';
+        setError(errorMessage);
+        toast({
+          title: 'Error',
+          description: 'Failed to load conversations. Showing demo content only.',
+          variant: 'destructive'
+        });
+
+        // Fall back to demo conversations only
+        const demoConvs = DEMO_CONVERSATIONS.reduce((acc: Conversation[], msg) => {
+          if (msg.role === 'user') {
+            acc.push({
+              id: msg.id,
+              title: msg.content.slice(0, 50) + (msg.content.length > 50 ? '...' : ''),
+              userId: 'demo',
+              category: 'demo',
+              createdAt: new Date(msg.timestamp || Date.now()),
+              updatedAt: new Date(msg.timestamp || Date.now())
+            });
+          }
+          return acc;
+        }, []);
+        setConversations(demoConvs);
       }
-      if (currentGroup) {
-        conversationGroups[currentGroup].push(msg);
-      }
-    });
+    };
 
-    const convList = Object.entries(conversationGroups).map(([id, messages]) => ({
-      id,
-      title: messages[0].content.slice(0, 50) + (messages[0].content.length > 50 ? '...' : '')
-    }));
+    loadConversations();
+  }, [toast, retryApiCall]);
 
-    setConversations(convList);
-  }, []);
-
+  // Load conversation messages
   useEffect(() => {
-    if (!currentConversationId) {
-      setMessages([]);
-      return;
-    }
-
-    let foundStart = false;
-    const conversationMessages = mockMessages.filter((msg) => {
-      if (msg.id === currentConversationId) {
-        foundStart = true;
-        return true;
+    const loadMessages = async () => {
+      if (!currentConversationId) {
+        setMessages([]);
+        return;
       }
-      if (!foundStart) return false;
-      if (msg.role === 'user' && msg.id !== currentConversationId) {
-        foundStart = false;
-        return false;
-      }
-      return foundStart;
-    });
 
-    setMessages(conversationMessages);
-  }, [currentConversationId]);
+      // If it's a demo conversation, use mock data
+      if (currentConversationId.startsWith('1') || currentConversationId.startsWith('2')) {
+        setIsDemo(true);
+        let foundStart = false;
+        const conversationMessages = DEMO_CONVERSATIONS.filter((msg) => {
+          if (msg.id === currentConversationId) {
+            foundStart = true;
+            return true;
+          }
+          if (!foundStart) return false;
+          if (msg.role === 'user' && msg.id !== currentConversationId) {
+            foundStart = false;
+            return false;
+          }
+          return foundStart;
+        });
+        setMessages(conversationMessages);
+        return;
+      }
+
+      setIsDemo(false);
+      setError(null);
+      try {
+        const messages = await retryApiCall(() => chatApi.getConversation(currentConversationId));
+        setMessages(messages);
+      } catch (error) {
+        console.error('Error loading messages:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load messages';
+        setError(errorMessage);
+        toast({
+          title: 'Error',
+          description: 'Failed to load conversation messages.',
+          variant: 'destructive'
+        });
+        setMessages([]);
+      }
+    };
+
+    loadMessages();
+  }, [currentConversationId, toast, retryApiCall]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,114 +160,109 @@ export function ChatInterface() {
 
   const handleSelectConversation = (id: string) => {
     setCurrentConversationId(id);
-    let foundStart = false;
-    const conversationMessages = mockMessages.filter((msg) => {
-      if (msg.id === id) {
-        foundStart = true;
-        return true;
-      }
-      if (!foundStart) return false;
-      if (msg.role === 'user' && msg.id !== id) {
-        foundStart = false;
-        return false;
-      }
-      return foundStart;
-    });
-
-    setMessages(conversationMessages);
     setHasInteracted(true);
+    setError(null);
   };
 
   const handleNewConversation = () => {
-    const newId = `conv-${Date.now()}`;
-    const newConversation: Conversation = {
-      id: newId,
-      title: 'new chat'
-    };
-    setConversations((prev) => [newConversation, ...prev]);
-    setCurrentConversationId(newId);
+    setCurrentConversationId(null);
     setMessages([]);
     setHasInteracted(false);
+    setIsDemo(false);
+    setError(null);
   };
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = async (content: string) => {
     setHasInteracted(true);
+    setError(null);
 
     const userMessage: ChatMessageType = {
       id: `user-${Date.now()}`,
       content,
       role: 'user',
-      timestamp: new Date().toISOString(),
-      category: 'general'
+      timestamp: new Date().toISOString()
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    if (messages.length === 0) {
-      setConversations((prev) =>
-        prev.map((conv) =>
-          conv.id === currentConversationId
-            ? { ...conv, title: content.slice(0, 50) + (content.length > 50 ? '...' : '') }
-            : conv
-        )
-      );
-    }
-
     setIsLoading(true);
-    setTimeout(() => {
-      let responseMessage: ChatMessageType | undefined;
+    try {
+      const response = await retryApiCall(() =>
+        chatApi.sendMessage({
+          message: content,
+          conversationId: currentConversationId || undefined
+        })
+      );
 
-      if (content.toLowerCase().includes('compare') && content.toLowerCase().includes('brown')) {
-        responseMessage = mockMessages.find(
-          (msg) => msg.category === 'switch_comparison' && msg.role === 'assistant'
-        );
-      } else if (content.toLowerCase().includes('typing experience')) {
-        responseMessage = mockMessages.find(
-          (msg) => msg.content.includes('typing experience') && msg.role === 'assistant'
-        );
-      } else if (content.toLowerCase().includes('office')) {
-        responseMessage = mockMessages.find(
-          (msg) => msg.content.includes('office use') && msg.role === 'assistant'
-        );
-      }
-
-      if (!responseMessage) {
-        responseMessage = {
-          id: `assistant-${Date.now()}`,
-          role: 'assistant',
-          timestamp: new Date().toISOString(),
-          category: 'general',
-          content:
-            "I'd be happy to help with your question about mechanical keyboard switches. Could you please be more specific about what you'd like to know?"
+      // If this was the first message in a new conversation, update the conversations list
+      if (!currentConversationId) {
+        const newConversation: Conversation = {
+          id: response.id.split('-')[0],
+          title: content.slice(0, 50) + (content.length > 50 ? '...' : ''),
+          userId: 'user',
+          category: 'chat',
+          createdAt: new Date(),
+          updatedAt: new Date()
         };
+        setConversations((prev) => [newConversation, ...prev]);
+        setCurrentConversationId(newConversation.id);
       }
 
-      const finalResponse = {
-        ...responseMessage,
-        id: `assistant-${Date.now()}`,
-        timestamp: new Date().toISOString()
-      };
+      setMessages((prev) => [...prev, response]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
+      setError(errorMessage);
+      toast({
+        title: 'Error',
+        description: 'Failed to send message. Please try again.',
+        variant: 'destructive'
+      });
 
-      setMessages((prev) => [...prev, finalResponse]);
+      // Add a friendly error message
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content:
+            "I apologize, but I'm having trouble responding right now. Please try again in a moment.",
+          timestamp: new Date().toISOString()
+        }
+      ]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
-  const handleDeleteConversation = (id: string) => {
-    setConversations((prev) => prev.filter((conv) => conv.id !== id));
-    if (id === currentConversationId) {
-      const remainingConversations = conversations.filter((conv) => conv.id !== id);
-      if (remainingConversations.length > 0) {
-        setCurrentConversationId(remainingConversations[0].id);
-        setMessages(
-          mockMessages.filter((msg) => {
-            return msg.id === remainingConversations[0].id || msg.role === 'assistant';
-          })
-        );
-      } else {
-        setCurrentConversationId(null);
-        setMessages([]);
-        setHasInteracted(false);
+  const handleDeleteConversation = async (id: string) => {
+    if (id.startsWith('1') || id.startsWith('2')) {
+      return;
+    }
+
+    try {
+      await retryApiCall(() => chatApi.deleteConversation(id));
+      setConversations((prev) => prev.filter((conv) => conv.id !== id));
+      if (id === currentConversationId) {
+        const remainingConversations = conversations.filter((conv) => conv.id !== id);
+        if (remainingConversations.length > 0) {
+          setCurrentConversationId(remainingConversations[0].id);
+        } else {
+          handleResetState();
+        }
       }
+      toast({
+        title: 'Success',
+        description: 'Conversation deleted successfully.'
+      });
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete conversation';
+      setError(errorMessage);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete conversation. Please try again.',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -190,6 +270,8 @@ export function ChatInterface() {
     setCurrentConversationId(null);
     setMessages([]);
     setHasInteracted(false);
+    setIsDemo(false);
+    setError(null);
   };
 
   return (
@@ -211,6 +293,11 @@ export function ChatInterface() {
           ) : (
             <ScrollArea className="flex-1 px-4">
               <div className="container max-w-4xl mx-auto">
+                {error && (
+                  <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-md mb-4">
+                    {error}
+                  </div>
+                )}
                 {messages.map((message, index) => (
                   <ChatMessage
                     key={message.id}
@@ -233,7 +320,7 @@ export function ChatInterface() {
               <div className="container max-w-4xl mx-auto space-y-2">
                 <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
                 <p className="text-xs text-center text-muted-foreground">
-                  for educational purposes :D
+                  {isDemo ? 'demo mode - showing example responses' : 'connected to AI'}
                 </p>
               </div>
             </div>

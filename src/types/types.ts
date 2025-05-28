@@ -4,8 +4,3 @@ export interface Message {
   sender: 'user' | 'assistant';
   timestamp: string;
 }
-
-export interface Conversation {
-  id: string;
-  title: string;
-}
