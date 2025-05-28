@@ -110,15 +110,17 @@ function ConversationList({
                 className={cn(
                   'w-full flex items-center gap-2 px-2 py-2 text-left text-sm rounded-md transition-colors',
                   conversation.id === currentConversationId
-                    ? 'bg-primary/10 text-primary pointer-events-none'
-                    : 'hover:bg-muted/50'
+                    ? 'bg-primary/10 text-primary dark:bg-white/20 dark:text-white pointer-events-none'
+                    : 'hover:bg-muted/50 dark:hover:bg-white/10'
                 )}
                 onClick={() => onSelectConversation(conversation.id)}
               >
                 <div
                   className={cn(
                     'rounded-md p-1 transition-colors relative group/icon',
-                    conversation.id === currentConversationId ? '' : 'hover:bg-primary/10'
+                    conversation.id === currentConversationId 
+                      ? '' 
+                      : 'hover:bg-primary/10 hover:text-primary dark:hover:bg-white/20 dark:hover:text-white/90'
                   )}
                 >
                   <div className="relative w-4 h-4">
@@ -126,8 +128,8 @@ function ConversationList({
                       className={cn(
                         'h-4 w-4 shrink-0 transition-all absolute',
                         conversation.id === currentConversationId
-                          ? 'text-primary'
-                          : 'text-muted-foreground group-hover/icon:opacity-0'
+                          ? 'text-primary dark:text-white/90'
+                          : 'text-muted-foreground dark:text-white/60 group-hover/icon:opacity-0'
                       )}
                     />
                     {conversation.id !== currentConversationId && (

@@ -161,7 +161,7 @@ export function ChatMessage({ message, isLastMessage }: ChatMessageProps) {
           'group rounded-lg px-4 py-3 max-w-[95%] transition-colors duration-200',
           isUserMessage
             ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-            : 'bg-card hover:bg-card/90'
+            : 'bg-card hover:bg-card/90 dark:hover:bg-card/70'
         )}
       >
         <p className="whitespace-pre-wrap text-sm leading-relaxed">

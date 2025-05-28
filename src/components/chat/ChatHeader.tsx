@@ -6,13 +6,16 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog.js';
-import { Info } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme.js';
+import { Info, Moon, Sun } from 'lucide-react';
 
 interface ChatHeaderProps {
   onReset: () => void;
 }
 
 export function ChatHeader({ onReset }: ChatHeaderProps) {
+  const { theme, setTheme } = useTheme();
+
   return (
     <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center justify-between px-4">
@@ -28,6 +31,16 @@ export function ChatHeader({ onReset }: ChatHeaderProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="About switch.ai">

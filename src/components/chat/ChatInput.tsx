@@ -34,7 +34,7 @@ export function ChatInput({ onSendMessage, isLoading = false }: ChatInputProps) 
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="min-h-[60px] resize-none pr-12 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary"
+          className="min-h-[60px] resize-none pr-12 bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/20 dark:focus-visible:ring-white/20"
           disabled={isLoading}
         />
         <Button
