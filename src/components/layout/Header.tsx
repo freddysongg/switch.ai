@@ -28,9 +28,6 @@ export function Header() {
                 <span className="text-sm text-muted-foreground hidden sm:inline">
                   {currentUser.email}
                 </span>
-                <Button asChild size="sm">
-                  <Link to="/chat">Open App</Link>
-                </Button>
               </div>
             ) : (
               <>

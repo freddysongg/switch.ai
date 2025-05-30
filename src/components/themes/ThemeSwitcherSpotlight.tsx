@@ -4,9 +4,9 @@ import { Palette } from 'lucide-react';
 import * as React from 'react';
 
 import { applyTheme, AppTheme, availableAppThemes, themeColorPreviews } from '@/lib/themeService';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils.js';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button.js';
 import {
   Command,
   CommandEmpty,
@@ -14,8 +14,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList
-} from '@/components/ui/command';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+} from '@/components/ui/command.js';
+import { Dialog, DialogContent } from '@/components/ui/dialog.js';
 
 const getThemePreviewColors = (themeId: string): Required<AppTheme['previewColors']> => {
   const specificPreview = themeColorPreviews[themeId];
@@ -116,16 +116,16 @@ export function ThemeSwitcherSpotlight() {
             <div className="flex items-center border-b border-border px-4 py-3 rounded-t-lg">
               <CommandInput
                 placeholder="search themes..."
-                className="flex h-8 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground font-mono border-0 focus:ring-0"
+                className="flex h-8 w-full bg-transparent text-sm outline-none text-foreground placeholder:text-foreground/70 font-mono border-0 focus:ring-0"
               />
             </div>
             <CommandList className="max-h-[70vh] overflow-y-auto">
-              <CommandEmpty className="py-8 text-center text-sm text-muted-foreground font-mono">
+              <CommandEmpty className="py-8 text-center text-sm text-foreground font-mono">
                 no themes found
               </CommandEmpty>
               <CommandGroup>
                 <div className="px-2 py-1">
-                  <p className="px-2 text-xs font-medium text-muted-foreground font-mono uppercase tracking-wider">
+                  <p className="px-2 text-xs font-medium text-foreground/70 font-mono uppercase tracking-wider">
                     available themes
                   </p>
                 </div>
@@ -159,7 +159,7 @@ export function ThemeSwitcherSpotlight() {
                         </div>
                         <div className="flex flex-col">
                           <span className="text-sm font-medium">{theme.name}</span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-foreground/70">
                             {theme.baseMode} • {theme.id}
                           </span>
                         </div>
@@ -172,7 +172,7 @@ export function ThemeSwitcherSpotlight() {
                           </span>
                         )}
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="text-xs text-muted-foreground font-mono">↵</div>
+                          <div className="text-xs text-foreground/70 font-mono">↵</div>
                         </div>
                       </div>
                     </CommandItem>

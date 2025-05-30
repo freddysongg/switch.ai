@@ -270,7 +270,6 @@ export default function LandingPage() {
                   get started
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">free to use. no credit card required.</p>
             </div>
           </div>
         </section>
