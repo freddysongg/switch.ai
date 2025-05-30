@@ -1,13 +1,14 @@
-import { Button } from '@/components/ui/button.js';
-import { ScrollArea } from '@/components/ui/scroll-area.js';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet.js';
-import { useIsMobile } from '@/hooks/use-mobile.js';
 import { ChevronLeft, MessageSquare, PlusCircle, Trash2, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
+import { useIsMobile } from '@/hooks/use-mobile.js';
 import { cn } from '@/lib/utils.js';
 
 import { Conversation } from '@/types/chat';
+
+import { Button } from '@/components/ui/button.js';
+import { ScrollArea } from '@/components/ui/scroll-area.js';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet.js';
 
 interface ConversationListProps {
   conversations: Conversation[];

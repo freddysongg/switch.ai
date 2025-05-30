@@ -1,7 +1,8 @@
-import { Button } from '@/components/ui/button.js';
-import { Textarea } from '@/components/ui/textarea.js';
 import { SendHorizontal } from 'lucide-react';
 import { FormEvent, KeyboardEvent, useState } from 'react';
+
+import { Button } from '@/components/ui/button.js';
+import { Textarea } from '@/components/ui/textarea.js';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -44,7 +45,7 @@ export function ChatInput({ onSendMessage, isLoading = false }: ChatInputProps) 
           className="absolute right-2 bottom-2 h-8 w-8 bg-primary hover:bg-primary/90"
         >
           <SendHorizontal className="h-4 w-4" />
-          <span className="sr-only">Send message</span>
+          <span className="sr-only">send message</span>
         </Button>
       </div>
     </form>

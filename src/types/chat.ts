@@ -3,10 +3,10 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  metadata?: Record<string, any>;
+  createdAt: Date;
   category?: string;
   timestamp?: string;
-  createdAt?: Date;
-  metadata?: Record<string, any>;
   comparison?: {
     switch1: SwitchDetails;
     switch2: SwitchDetails;
@@ -30,6 +30,17 @@ export interface SwitchDetails {
   lubed_status: string;
 }
 
+export interface SwitchSearchResult {
+  id: string;
+  name: string;
+  manufacturer: string;
+  type: string | null;
+  spring: string | null;
+  actuationForce: number | null;
+  description_text?: string;
+  similarity?: number;
+}
+
 export interface Conversation {
   id: string;
   userId: string;
@@ -39,9 +50,39 @@ export interface Conversation {
   updatedAt: Date;
 }
 
+// Chat request/response interfaces
+export interface ChatRequest {
+  message: string;
+  conversationId?: string;
+}
+
 export interface ChatResponse {
   id: string;
   role: 'assistant';
   content: string;
   metadata?: Record<string, any>;
+}
+
+// Rate limiting interfaces
+export interface RateLimit {
+  userId: string;
+  endpoint: string;
+  count: number;
+  resetAt: Date;
+}
+
+// Analytics interfaces
+export interface AnalyticsEvent {
+  userId?: string;
+  eventType: string;
+  metadata: Record<string, any>;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name?: string | null;
+  role: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

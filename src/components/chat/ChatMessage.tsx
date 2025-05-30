@@ -1,10 +1,11 @@
-import { Badge } from '@/components/ui/badge.js';
-import { Card } from '@/components/ui/card.js';
 import { useEffect, useState } from 'react';
 
 import { cn } from '@/lib/utils.js';
 
 import { ChatMessage as ChatMessageType } from '@/types/chat';
+
+import { Badge } from '@/components/ui/badge.js';
+import { Card } from '@/components/ui/card.js';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -140,7 +141,7 @@ export function ChatMessage({ message, isLastMessage }: ChatMessageProps) {
           >
             <p className="text-sm leading-relaxed">
               {message.analysis ||
-                'Based on the comparison, each switch offers unique characteristics. Consider factors like actuation force, travel distance, and whether they come pre-lubricated when making your choice. The spring type and materials used will also affect the typing experience and longevity of the switches.'}
+                'based on the comparison, each switch offers unique characteristics. consider factors like actuation force, travel distance, and whether they come pre-lubricated when making your choice. the spring type and materials used will also affect the typing experience and longevity of the switches.'}
             </p>
           </div>
         )}

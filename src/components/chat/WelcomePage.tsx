@@ -1,7 +1,8 @@
-import { Button } from '@/components/ui/button.js';
-import { Textarea } from '@/components/ui/textarea.js';
 import { SendHorizontal } from 'lucide-react';
 import { KeyboardEvent, useEffect, useState } from 'react';
+
+import { Button } from '@/components/ui/button.js';
+import { Textarea } from '@/components/ui/textarea.js';
 
 interface WelcomePageProps {
   onSendMessage: (message: string) => void;
@@ -79,7 +80,7 @@ export function WelcomePage({ onSendMessage, isLoading }: WelcomePageProps) {
               onClick={handleClick}
             >
               <SendHorizontal className="h-4 w-4" />
-              <span className="sr-only">Send message</span>
+              <span className="sr-only">send message</span>
             </Button>
           </div>
         </div>

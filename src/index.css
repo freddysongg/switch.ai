@@ -1,9 +1,74 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
+@layer base {
+  :root {
+    --bg-color: 0 0% 100%;               
+    --text-color: 240 10% 3.9%;         
+    
+    --main-color: 240 10% 3.9%;         
+    --main-color-foreground: 0 0% 98%; 
+    
+    --sub-color: 240 3.8% 46.1%;         
+    --sub-alt-color: 240 4.8% 95.9%;    
+    
+    --caret-color: 240 10% 3.9%;
+    --error-color: 0 84.2% 60.2%;
+    --error-color-foreground: 0 0% 98%;
+
+    --border-color: 240 5.9% 90%;
+    --input-bg-color: 240 5.9% 90%;
+
+    --radius: 0.5rem;
+
+    --sidebar-bg-color: 240 4.8% 95.9%;
+    --sidebar-text-color: 240 10% 3.9%;
+    --sidebar-border-color: 240 5.9% 90%;
+  }
+  
+  .dark {
+    --bg-color: 220 6% 10%;
+    --text-color: 210 20% 98%;
+
+    --main-color: 225 45% 38%;
+    --main-color-foreground: 210 20% 98%;
+    
+    --sub-color: 210 15% 65%;
+    --sub-alt-color: 220 6% 13%;
+
+    --caret-color: 210 20% 90%;
+    --error-color: 0 72% 51%;
+    --error-color-foreground: 0 0% 98%;
+    
+    --border-color: 220 6% 28%;
+    --input-bg-color: 220 6% 28%;
+
+    --sidebar-bg-color: 220 6% 12%;
+    --sidebar-text-color: 210 20% 98%;
+    --sidebar-border-color: 220 6% 22%;
+  }
+
+  html, body {
+    @apply h-full;
+  }
+
+  * {
+    @apply border-border; 
+  }
+
+  body {  
+    @apply bg-background text-foreground font-sans antialiased;
+    scroll-behavior: smooth;
+  }
+
+  .title-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-foreground/80 to-foreground/50;
+  }
+}
+
 @keyframes card-appear {
   0% {
     opacity: 0;
@@ -15,79 +80,37 @@
   }
 }
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
- 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
- 
-    --primary: 231 100% 10%;
-    --primary-foreground: 0 0% 98%;
- 
-    --secondary: 231 80% 25%;
-    --secondary-foreground: 0 0% 98%;
- 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
- 
-    --accent: 231 100% 10%;
-    --accent-foreground: 0 0% 98%;
- 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 231 100% 10%;
- 
-    --radius: 0.5rem;
-  }
- 
-  .dark {
-    --background: 0 0% 11%;
-    --foreground: 0 0% 98%;
- 
-    --card: 0 0% 13%;
-    --card-foreground: 0 0% 98%;
- 
-    --popover: 0 0% 13%;
-    --popover-foreground: 0 0% 98%;
- 
-    --primary: 231 100% 8%;
-    --primary-foreground: 0 0% 98%;
- 
-    --secondary: 231 80% 25%;
-    --secondary-foreground: 0 0% 98%;
- 
-    --muted: 0 0% 15%;
-    --muted-foreground: 240 5% 64.9%;
- 
-    --accent: 231 100% 8%;
-    --accent-foreground: 0 0% 98%;
- 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
- 
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 231 80% 25%;
-  }
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-  }
+@keyframes slide-in-up {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
 
-  .title-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-b from-foreground/80 to-foreground/50;
-  }
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-slide-in-up {
+  animation: slide-in-up 0.5s ease-out forwards;
+}
+
+.stagger-children > * {
+  opacity: 0;
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

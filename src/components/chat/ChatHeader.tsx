@@ -1,21 +1,21 @@
+import { Info } from 'lucide-react';
+
 import { Button } from '@/components/ui/button.js';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from '@/components/ui/dialog.js';
-import { useTheme } from '@/hooks/useTheme.js';
-import { Info, Moon, Sun } from 'lucide-react';
+} from '@/components/ui/dialog';
+import { ThemeSwitcherSpotlight } from '@/components/themes/ThemeSwitcherSpotlight.js';
 
 interface ChatHeaderProps {
   onReset: () => void;
 }
 
 export function ChatHeader({ onReset }: ChatHeaderProps) {
-  const { theme, setTheme } = useTheme();
-
   return (
     <header className="sticky top-0 z-10 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center justify-between px-4">
@@ -31,16 +31,8 @@ export function ChatHeader({ onReset }: ChatHeaderProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          >
-            <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
+          <ThemeSwitcherSpotlight />
+
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="About switch.ai">
@@ -53,86 +45,78 @@ export function ChatHeader({ onReset }: ChatHeaderProps) {
                 <div className="relative z-10">
                   <DialogHeader>
                     <DialogTitle className="text-center font-display text-2xl">
-                      about switch.ai
+                      About switch.ai
                     </DialogTitle>
+                    <DialogDescription className="text-center text-muted-foreground sr-only">
+                      Detailed information about the switch.ai application, its mission, features,
+                      and development story.
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-8 overflow-auto px-4 sm:px-6 pb-6 max-h-[calc(90vh-8rem)]">
-                    {/* Mission & Vision */}
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">our mission</h3>
+                      <h3 className="text-lg font-semibold">Our Mission</h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        switch.ai is your ai-powered companion for discovering mechanical keyboard
-                        switches. we believe that finding the perfect switch shouldn't be
-                        overwhelming. whether you're looking for the perfect typing experience,
+                        switch.ai is your AI-powered companion for discovering mechanical keyboard
+                        switches. We believe that finding the perfect switch shouldn't be
+                        overwhelming. Whether you're looking for the perfect typing experience,
                         silent switches for the office, or something specific, we're here to help
                         you navigate the complex world of mechanical switches.
                       </p>
                     </div>
 
-                    {/* Development Story */}
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">the journey</h3>
+                      <h3 className="text-lg font-semibold">The Journey</h3>
                       <p className="text-muted-foreground leading-relaxed">
-                        born from personal experience with the overwhelming variety of mechanical
-                        switches, switch.ai was developed to simplify the selection process. as
+                        Born from personal experience with the overwhelming variety of mechanical
+                        switches, switch.ai was developed to simplify the selection process. As
                         keyboard enthusiasts ourselves, we understand the importance of finding
-                        switches that match your preferences perfectly. our ai-powered platform
+                        switches that match your preferences perfectly. Our AI-powered platform
                         combines extensive switch knowledge with modern technology to provide
                         personalized recommendations.
                       </p>
                     </div>
 
-                    {/* Features */}
                     <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">what we offer</h3>
+                      <h3 className="text-lg font-semibold">What We Offer</h3>
                       <ul className="space-y-2 text-muted-foreground">
                         <li className="flex items-center gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary/80" />
-                          intelligent switch comparisons and recommendations
+                          Intelligent switch comparisons and recommendations
                         </li>
                         <li className="flex items-center gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary/80" />
-                          detailed specifications and characteristics
+                          Detailed specifications and characteristics
                         </li>
                         <li className="flex items-center gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary/80" />
-                          natural language interaction for easy exploration
+                          Natural language interaction for easy exploration
                         </li>
                         <li className="flex items-center gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary/80" />
-                          real-world usage insights and compatibility information
+                          Real-world usage insights and compatibility information
                         </li>
                       </ul>
                     </div>
 
-                    {/* Upcoming Features Box */}
                     <div className="rounded-lg border bg-card/50 p-6 space-y-4">
-                      <h3 className="text-lg font-semibold">what's next? 🚀</h3>
+                      <h3 className="text-lg font-semibold">What's next? 🚀</h3>
                       <p className="text-sm text-muted-foreground">
-                        we're constantly working to improve switch.ai. here are some features we're
+                        We're constantly working to improve switch.ai. Here are some features we're
                         considering:
                       </p>
                       <ul className="space-y-2 text-sm">
                         <li className="flex items-center gap-2">
                           <span className="w-1 h-1 rounded-full bg-primary/60" />
-                          sound profile analysis and comparison
+                          Sound profile analysis and comparison
                         </li>
                         <li className="flex items-center gap-2">
                           <span className="w-1 h-1 rounded-full bg-primary/60" />
-                          visual switch animations
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="w-1 h-1 rounded-full bg-primary/60" />
-                          community reviews and experiences
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="w-1 h-1 rounded-full bg-primary/60" />
-                          keyboard compatibility checker
+                          Keyboard compatibility checker
                         </li>
                       </ul>
                       <div className="mt-4 pt-4 border-t border-border/30">
                         <p className="text-sm text-primary/90">
-                          have a feature suggestion? we'd love to hear from you!
+                          Have a feature suggestion? We'd love to hear from you!
                         </p>
                       </div>
                     </div>
