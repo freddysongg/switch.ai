@@ -97,9 +97,6 @@ export default function LandingPage() {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 2 }}
               >
-                <p className="text-sm text-muted-foreground uppercase mb-8">
-                  trusted by keyboard enthusiasts worldwide
-                </p>
                 <InfiniteSlider items={trustedBrands} speed={25} pauseOnHover />
               </motion.div>
             </div>
@@ -119,14 +116,14 @@ export default function LandingPage() {
             </div>
             <div className="mb-16 md:mb-24">
               <h3 className="text-2xl md:text-3xl font-semibold text-center mb-10 md:mb-12 text-foreground">
-                discover what switch.ai offers
+                discover what we offer
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                 {[
                   {
                     icon: Bot,
                     title: 'ai recommendations',
-                    desc: 'our ai analyzes your preferences to recommend the perfect switches for your needs.',
+                    desc: 'switch.ai analyzes your preferences to recommend the perfect switches for your needs.',
                     linkText: 'learn more',
                     href: '/chat'
                   },
@@ -140,7 +137,7 @@ export default function LandingPage() {
                   {
                     icon: Sparkles,
                     title: 'interactive chat',
-                    desc: 'chat with our ai to get instant, detailed answers about any switch. no jargon required.',
+                    desc: 'chat with switch.ai to get instant, detailed answers about any switch. no jargon required.',
                     linkText: 'start chatting',
                     href: '/chat'
                   },
@@ -199,7 +196,7 @@ export default function LandingPage() {
                   {
                     icon: Zap,
                     title: '2. get ai recommendations',
-                    desc: 'our ai analyzes thousands of switches to find the perfect matches for your needs.'
+                    desc: 'switch.ai analyzes thousands of switches to find the perfect matches for your needs.'
                   },
                   {
                     icon: Users,

@@ -68,6 +68,13 @@
     border-color: hsl(var(--border-color)); 
   }
 
+  input {
+    background-color: hsl(var(--input-bg-color)); 
+    border-width: 1px; 
+    border-color: hsl(var(--border-color)); 
+    /* color: hsl(var(--foreground-color)); */
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     html {
       scroll-behavior: smooth;

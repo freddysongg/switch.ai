@@ -133,7 +133,7 @@ export function Header() {
           </div>
 
           {location.pathname === '/' && (
-            <div className="hidden md:block">
+            <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
               <div className="flex space-x-1">
                 {navItems.map((item, index) => (
                   <SmoothScrollLink

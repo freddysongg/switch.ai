@@ -2,8 +2,6 @@ import { motion } from 'framer-motion';
 import { SendHorizontal } from 'lucide-react';
 import { FormEvent, KeyboardEvent, useRef, useState } from 'react';
 
-import { cn } from '@/lib/utils';
-
 import { ChatInputProps } from '@/types/chat.js';
 
 import { GlowButton } from '@/components/ui/glow-button.js';
@@ -32,10 +30,8 @@ export function ChatInput({ onSendMessage, isLoading = false }: ChatInputProps) 
   return (
     <motion.form
       onSubmit={handleSubmit}
-      className={cn(
-        'flex items-end gap-2 p-3 md:p-4 border-t border-border/80',
-        'bg-card dark:bg-slate-900'
-      )}
+      className="flex items-end gap-2 p-3 md:p-4 bg-muted/60 dark:bg-muted/30 border-t border-border/80"
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
     >
@@ -46,12 +42,7 @@ export function ChatInput({ onSendMessage, isLoading = false }: ChatInputProps) 
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
-          className={cn(
-            'min-h-[52px] sm:min-h-[60px] resize-none pr-12 py-3 border rounded-xl text-foreground placeholder:text-muted-foreground/80 shadow-sm',
-            'bg-card dark:bg-slate-900',
-            'border-border/70 focus-visible:ring-2 focus-visible:ring-primary/40 dark:focus-visible:ring-primary/60',
-            'focus-visible:border-transparent'
-          )}
+          className="min-h-[52px] sm:min-h-[60px] resize-none pr-12 py-3 bg-muted/60 dark:bg-muted/30 border rounded-xl focus-visible:ring-2 focus-visible:ring-primary/40 dark:focus-visible:ring-primary/60 text-muted-foreground placeholder:text-muted-foreground/70 shadow-sm"
           disabled={isLoading}
           rows={1}
         />
