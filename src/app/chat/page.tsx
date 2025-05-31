@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -29,7 +30,6 @@ export function ChatInterface() {
   const { toast } = useToast();
   const { authToken, currentUser } = useAuth();
 
-  // Retry logic for API calls
   const retryApiCall = useCallback(
     async <T,>(apiCall: () => Promise<T>, retries = MAX_RETRIES): Promise<T> => {
       try {
@@ -103,18 +103,25 @@ export function ChatInterface() {
     loadMessages();
   }, [currentConversationId, toast, retryApiCall]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior, block: 'end' });
+    }
+  }, []);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      const behavior = lastMessage?.role === 'user' || isLoading ? 'smooth' : 'auto';
+      setTimeout(() => scrollToBottom(behavior), 50);
+    }
+  }, [messages, isLoading, scrollToBottom]);
 
   const handleSelectConversation = (id: string) => {
     setCurrentConversationId(id);
     setHasInteracted(true);
     setError(null);
+    setMessages([]);
   };
 
   const handleNewConversation = () => {
@@ -125,7 +132,6 @@ export function ChatInterface() {
   };
 
   const handleSendMessage = async (content: string) => {
-    // Input validation
     if (!content.trim()) {
       toast({
         title: 'error',
@@ -138,15 +144,15 @@ export function ChatInterface() {
     setHasInteracted(true);
     setError(null);
 
-    const userMessage: ChatMessageType = {
-      id: `user-${Date.now()}`,
+    const newUserMessage: ChatMessageType = {
+      id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`,
       content,
       role: 'user',
       timestamp: new Date().toISOString(),
       createdAt: new Date(),
       metadata: {}
     };
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => [...prev, newUserMessage]);
 
     setIsLoading(true);
     try {
@@ -157,27 +163,25 @@ export function ChatInterface() {
         })
       );
 
-      // Handle new conversation creation
       if (!currentConversationId && response.metadata && response.metadata.conversationId) {
         setCurrentConversationId(response.metadata.conversationId);
-        // Optionally refresh conversation list
         if (authToken) {
-          try {
-            const apiConversations = await retryApiCall(() => chatApi.listConversations());
-            setConversations(apiConversations);
-          } catch (error) {
-            console.error('Error refreshing conversations:', error);
-          }
+          retryApiCall(() => chatApi.listConversations())
+            .then(setConversations)
+            .catch((err) => console.error('Failed to refresh convos', err));
         }
       }
+      const assistantMessage: ChatMessageType = {
+        ...response,
+        id: response.id || `asst-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`,
+        timestamp: new Date().toISOString(),
+        createdAt: new Date()
+      };
 
       setMessages((prev) => [
-        ...prev,
-        {
-          ...response,
-          timestamp: new Date().toISOString(),
-          createdAt: new Date()
-        }
+        ...prev.filter((m) => m.id !== newUserMessage.id),
+        newUserMessage,
+        assistantMessage
       ]);
     } catch (error: unknown) {
       console.error('Error sending message:', error);
@@ -197,20 +201,15 @@ export function ChatInterface() {
         variant: 'destructive'
       });
 
-      // Add a fallback error message
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `error-${Date.now()}`,
-          role: 'assistant',
-          content:
-            AI_CONFIG?.FALLBACK_ERROR_MESSAGE_LLM ||
-            "i apologize, but i'm having trouble responding right now. please try again in a moment.",
-          timestamp: new Date().toISOString(),
-          createdAt: new Date(),
-          metadata: { error: true }
-        }
-      ]);
+      const errorResponseMessage: ChatMessageType = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: AI_CONFIG?.FALLBACK_ERROR_MESSAGE_LLM || 'Apologies, an error occurred.',
+        timestamp: new Date().toISOString(),
+        createdAt: new Date(),
+        metadata: { error: true }
+      };
+      setMessages((prev) => [...prev, errorResponseMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -252,7 +251,7 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="flex h-screen dark:bg-background">
+    <div className="flex h-screen bg-background dark:bg-background/95 text-foreground">
       <ConversationSidebar
         conversations={conversations}
         currentConversationId={currentConversationId}
@@ -260,45 +259,60 @@ export function ChatInterface() {
         onNewConversation={handleNewConversation}
         onDeleteConversation={handleDeleteConversation}
       />
-
       <main className="flex flex-1 flex-col overflow-hidden">
-        <ChatHeader onReset={handleResetState} />
-
-        <div className="relative flex flex-1 flex-col overflow-hidden bg-muted/50">
-          {!hasInteracted ? (
-            <WelcomePage onSendMessage={handleSendMessage} isLoading={isLoading} />
+        <ChatHeader onReset={handleNewConversation} />
+        <div className="relative flex flex-1 flex-col overflow-hidden bg-muted/30 dark:bg-muted/10">
+          {!hasInteracted && !currentConversationId ? (
+            <AnimatePresence>
+              <motion.div
+                key="welcome"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className="h-full flex flex-col"
+              >
+                <WelcomePage onSendMessage={handleSendMessage} isLoading={isLoading} />
+              </motion.div>
+            </AnimatePresence>
           ) : (
-            <ScrollArea className="flex-1 px-4">
-              <div className="container max-w-4xl mx-auto">
+            <ScrollArea className="flex-1 px-2 sm:px-4 pt-2 sm:pt-4">
+              <div className="container max-w-4xl mx-auto space-y-1 pb-2">
                 {error && (
-                  <div className="bg-destructive/10 text-destructive px-4 py-2 rounded-md mb-4">
+                  <motion.div
+                    className="bg-destructive/20 text-destructive px-4 py-2.5 rounded-lg mb-3 text-sm"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
                     {error}
-                  </div>
+                  </motion.div>
                 )}
-                {messages.map((message, index) => (
-                  <ChatMessage
-                    key={message.id}
-                    message={message}
-                    isLastMessage={index === messages.length - 1}
-                  />
-                ))}
-                {isLoading && (
-                  <div className="flex justify-start py-4">
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  </div>
+                <AnimatePresence initial={false}>
+                  {messages.map((message, index) => (
+                    <ChatMessage
+                      key={message.id}
+                      message={message}
+                      isLastMessage={index === messages.length - 1}
+                      currentUser={currentUser || undefined}
+                    />
+                  ))}
+                </AnimatePresence>
+                {isLoading && messages.length > 0 && messages.slice(-1)[0]?.role === 'user' && (
+                  <motion.div
+                    className="flex items-center gap-2 py-4 pl-10 text-muted-foreground"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-xs">assistant is typing...</span>
+                  </motion.div>
                 )}
-                <div ref={messagesEndRef} />
+                <div ref={messagesEndRef} className="h-1" />
               </div>
             </ScrollArea>
           )}
-
-          {hasInteracted && (
-            <div className="bg-background p-4">
-              <div className="container max-w-4xl mx-auto space-y-2">
-                <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
-                <p className="text-xs text-center text-muted-foreground">connected to ai</p>
-              </div>
-            </div>
+          {(hasInteracted || currentConversationId) && (
+            <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
           )}
         </div>
       </main>

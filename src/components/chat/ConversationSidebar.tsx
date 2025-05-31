@@ -1,65 +1,81 @@
+import { motion } from 'framer-motion';
 import { ChevronLeft, MessageSquare, PlusCircle, Trash2, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { useIsMobile } from '@/hooks/use-mobile.js';
 import { cn } from '@/lib/utils.js';
 
-import { Conversation } from '@/types/chat';
+import { ConversationListProps, ConversationSidebarProps } from '@/types/chat';
 
+import { BorderTrail } from '@/components/ui/border-trail.js';
 import { Button } from '@/components/ui/button.js';
 import { ScrollArea } from '@/components/ui/scroll-area.js';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet.js';
-
-interface ConversationListProps {
-  conversations: Conversation[];
-  currentConversationId: string | null;
-  onSelectConversation: (id: string) => void;
-  onDeleteConversation?: (id: string) => void;
-}
-
-interface ConversationSidebarProps extends ConversationListProps {
-  onNewConversation: () => void;
-}
 
 export function ConversationSidebarDesktop({
   conversations,
   currentConversationId,
   onSelectConversation,
-  onNewConversation
+  onNewConversation,
+  onDeleteConversation
 }: ConversationSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const [shouldShowIcon, setShouldShowIcon] = useState(false);
 
   const handleToggle = () => {
     setIsCollapsed(!isCollapsed);
-    setShouldShowIcon(!shouldShowIcon);
   };
 
   return (
     <>
-      <div
+      <motion.div
         ref={sidebarRef}
-        className={cn(
-          'hidden md:flex h-full flex-col border-r bg-sidebar text-sidebar-foreground transition-all duration-200',
-          isCollapsed ? 'w-0 border-none overflow-hidden' : 'w-60'
-        )}
+        className="hidden md:flex h-full flex-col border-r bg-sidebar text-sidebar-foreground shadow-md"
+        animate={{ width: isCollapsed ? 0 : 240 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        <div className="p-4 border-b border-sidebar-border flex items-center justify-between h-14">
-          <div
-            className={cn(
-              'flex items-center gap-2 transition-opacity duration-200',
-              isCollapsed && 'opacity-0'
-            )}
+        <div className="p-3 border-b border-sidebar-border flex items-center justify-between h-14 flex-shrink-0 overflow-hidden">
+          <motion.div
+            className="flex items-center gap-2"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: isCollapsed ? 0 : 1 }}
+            transition={{ duration: 0.2, delay: isCollapsed ? 0 : 0.1 }}
           >
             <MessageSquare className="h-5 w-5 shrink-0" />
-            <h2 className="text-lg font-semibold">chats</h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onNewConversation}>
-              <PlusCircle className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleToggle}>
+            <h2 className="text-lg font-semibold whitespace-nowrap">Chats</h2>
+          </motion.div>
+          <div className="flex items-center gap-1">
+            {!isCollapsed ? (
+              <BorderTrail className="rounded-md">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={onNewConversation}
+                  aria-label="New Chat"
+                >
+                  <PlusCircle className="h-5 w-5" />
+                </Button>
+              </BorderTrail>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={onNewConversation}
+                disabled={isCollapsed}
+                aria-label="New Chat"
+              >
+                <PlusCircle className="h-5 w-5" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={handleToggle}
+              aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            >
               <ChevronLeft
                 className={cn(
                   'h-5 w-5 transition-transform duration-200',
@@ -69,28 +85,38 @@ export function ConversationSidebarDesktop({
             </Button>
           </div>
         </div>
-
-        <div
-          className={cn(
-            'transition-all duration-200',
-            isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'
-          )}
+        <motion.div
+          className="flex-grow overflow-hidden"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: isCollapsed ? 0 : 1 }}
+          transition={{ duration: 0.2, delay: isCollapsed ? 0 : 0.1 }}
         >
           <ConversationList
             conversations={conversations}
             currentConversationId={currentConversationId}
             onSelectConversation={onSelectConversation}
+            onDeleteConversation={onDeleteConversation}
           />
-        </div>
-      </div>
-      {shouldShowIcon && isCollapsed && (
-        <div className="fixed left-0 top-0 bottom-0 w-12 z-50">
-          <div className="absolute inset-y-0 flex items-center" onClick={handleToggle}>
-            <Button variant="ghost" size="icon" className="h-8 w-8 ml-2">
-              <MessageSquare className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
+        </motion.div>
+      </motion.div>
+      {isCollapsed && (
+        <motion.div
+          className="fixed left-0 top-1/2 -translate-y-1/2 z-20 hidden md:block"
+          initial={{ x: -40 }}
+          animate={{ x: 4 }}
+          exit={{ x: -40 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 20, delay: 0.3 }}
+        >
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10 rounded-r-md rounded-l-none shadow-lg"
+            onClick={handleToggle}
+            aria-label="Expand Sidebar"
+          >
+            <MessageSquare className="h-5 w-5 rotate-0 transition-transform duration-200" />
+          </Button>
+        </motion.div>
       )}
     </>
   );
@@ -101,57 +127,67 @@ function ConversationList({
   currentConversationId,
   onSelectConversation,
   onDeleteConversation
-}: ConversationListProps & { onDeleteConversation?: (id: string) => void }) {
+}: ConversationListProps) {
   return (
-    <ScrollArea className="flex-1">
+    <ScrollArea className="flex-1 h-full">
       <div className="p-2 space-y-1">
         {conversations.length > 0 ? (
           conversations.map((conversation) => (
-            <div key={conversation.id} className="group relative">
+            <motion.div
+              key={conversation.id}
+              className="group relative"
+              whileHover={{ backgroundColor: 'hsla(var(--muted))' }}
+              style={{ borderRadius: '0.375rem' }}
+            >
               <button
                 className={cn(
-                  'w-full flex items-center gap-2 px-2 py-2 text-left text-sm rounded-md transition-colors',
+                  'w-full flex items-center gap-2 px-2.5 py-2 text-left text-sm rounded-md transition-colors',
                   conversation.id === currentConversationId
-                    ? 'bg-primary/10 text-primary dark:bg-white/20 dark:text-white pointer-events-none'
-                    : 'hover:bg-muted/50 dark:hover:bg-white/10'
+                    ? 'bg-primary/15 text-primary dark:bg-primary/25 dark:text-white font-medium pointer-events-none'
+                    : 'text-sidebar-foreground/80 hover:text-sidebar-foreground group-hover:bg-transparent dark:group-hover:bg-transparent'
                 )}
                 onClick={() => onSelectConversation(conversation.id)}
               >
-                <div
+                <MessageSquare
                   className={cn(
-                    'rounded-md p-1 transition-colors relative group/icon',
+                    'h-4 w-4 shrink-0',
                     conversation.id === currentConversationId
-                      ? ''
-                      : 'hover:bg-primary/10 hover:text-primary dark:hover:bg-white/20 dark:hover:text-white/90'
+                      ? 'text-primary dark:text-white/90'
+                      : 'text-muted-foreground group-hover:text-sidebar-foreground'
                   )}
-                >
-                  <div className="relative w-4 h-4">
-                    <MessageSquare
-                      className={cn(
-                        'h-4 w-4 shrink-0 transition-all absolute',
-                        conversation.id === currentConversationId
-                          ? 'text-primary dark:text-white/90'
-                          : 'text-muted-foreground dark:text-white/60 group-hover/icon:opacity-0'
-                      )}
-                    />
-                    {conversation.id !== currentConversationId && (
-                      <Trash2
-                        className="h-4 w-4 text-muted-foreground hover:text-destructive absolute transition-all opacity-0 group-hover/icon:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteConversation?.(conversation.id);
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-                <span className="min-w-0 break-words text-pretty">{conversation.title}</span>
+                />
+                <span className="truncate flex-1 min-w-0 break-words text-pretty">
+                  {conversation.title || 'New Chat'}
+                </span>
               </button>
-            </div>
+              {conversation.id !== currentConversationId && onDeleteConversation && (
+                <motion.div
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                    onClick={(e: React.MouseEvent) => {
+                      e.stopPropagation();
+                      onDeleteConversation(conversation.id);
+                    }}
+                    aria-label="Delete conversation"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </motion.div>
+              )}
+            </motion.div>
           ))
         ) : (
-          <div className="text-center text-sm text-muted-foreground p-4">
-            no conversations yet. start a new chat!
+          <div className="text-center text-sm text-muted-foreground p-4 h-full flex items-center justify-center">
+            <p>
+              No conversations yet. <br /> Start a new chat!
+            </p>
           </div>
         )}
       </div>
@@ -163,51 +199,70 @@ export function ConversationSidebarMobile({
   conversations,
   currentConversationId,
   onSelectConversation,
-  onNewConversation
+  onNewConversation,
+  onDeleteConversation
 }: ConversationSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSelectConversation = (id: string) => {
+  const handleSelectAndClose = (id: string) => {
     onSelectConversation(id);
+    setIsOpen(false);
+  };
+
+  const handleNewAndClose = () => {
+    onNewConversation();
     setIsOpen(false);
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden fixed left-3 top-2.5 z-20 h-9 w-9 bg-background/80 backdrop-blur-sm border border-border"
+        >
           <MessageSquare className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="p-0 w-60 bg-sidebar text-sidebar-foreground">
-        <div className="h-full flex flex-col">
-          <div className="p-4 border-b border-sidebar-border flex items-center justify-between h-14">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 shrink-0" />
-              <h2 className="text-lg font-semibold">chats</h2>
-            </div>
-            <div className="flex items-center gap-2">
+      <SheetContent
+        side="left"
+        className="p-0 w-64 sm:w-72 bg-sidebar text-sidebar-foreground flex flex-col"
+      >
+        <div className="p-3 border-b border-sidebar-border flex items-center justify-between h-14 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 shrink-0" />
+            <h2 className="text-lg font-semibold">Chats</h2>
+          </div>
+          <div className="flex items-center gap-1">
+            <BorderTrail className="rounded-md">
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => {
-                  onNewConversation();
-                  setIsOpen(false);
-                }}
+                className="h-8 w-8"
+                onClick={handleNewAndClose}
+                aria-label="New Chat"
               >
                 <PlusCircle className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
+            </BorderTrail>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close Sidebar"
+            >
+              <X className="h-5 w-5" />
+            </Button>
           </div>
-          <ConversationList
-            conversations={conversations}
-            currentConversationId={currentConversationId}
-            onSelectConversation={handleSelectConversation}
-          />
         </div>
+        <ConversationList
+          conversations={conversations}
+          currentConversationId={currentConversationId}
+          onSelectConversation={handleSelectAndClose}
+          onDeleteConversation={onDeleteConversation}
+        />
       </SheetContent>
     </Sheet>
   );

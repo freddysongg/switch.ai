@@ -17,7 +17,7 @@ import { ThemeProvider } from '@/components/themes/ThemeProvider.js';
 
 import './App.css';
 
-import { useAuth } from './hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth';
 
 function AppContent() {
   const { currentUser, isLoading } = useAuth();
@@ -25,6 +25,56 @@ function AppContent() {
 
   useEffect(() => {
     loadSavedTheme();
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.style.scrollBehavior = 'smooth';
+
+    const handleHashLinks = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        setTimeout(() => {
+          const element = document.querySelector(hash);
+          if (element) {
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+              inline: 'nearest'
+            });
+          }
+        }, 100);
+      }
+    };
+
+    handleHashLinks();
+
+    window.addEventListener('hashchange', handleHashLinks);
+
+    const handleAnchorClick = (e: Event) => {
+      const target = e.target as HTMLAnchorElement;
+      if (target.tagName === 'A' && target.hash) {
+        const href = target.getAttribute('href');
+        if (href?.startsWith('#')) {
+          e.preventDefault();
+          const element = document.querySelector(href);
+          if (element) {
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+              inline: 'nearest'
+            });
+            window.history.pushState(null, '', href);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('click', handleAnchorClick);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashLinks);
+      document.removeEventListener('click', handleAnchorClick);
+    };
   }, []);
 
   if (isLoading) {
@@ -71,14 +121,16 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="switch-ai-theme">
-      <AuthProvider>
-        <div className="h-full w-full font-mono">
-          <AppContent />
-          <Toaster />
-        </div>
-      </AuthProvider>
-    </ThemeProvider>
+    <>
+      <ThemeProvider defaultTheme="light" storageKey="switch-ai-theme">
+        <AuthProvider>
+          <div className="h-full w-full font-mono smooth-scroll">
+            <AppContent />
+            <Toaster />
+          </div>
+        </AuthProvider>
+      </ThemeProvider>
+    </>
   );
 }
 

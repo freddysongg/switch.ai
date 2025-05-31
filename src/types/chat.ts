@@ -17,6 +17,28 @@ export interface ChatMessage {
   analysis?: string;
 }
 
+export interface ChatMessageProps {
+  message: ChatMessage;
+  isLastMessage: boolean;
+  currentUser?: User;
+}
+
+export interface ChatInputProps {
+  onSendMessage: (message: string) => void;
+  isLoading?: boolean;
+}
+
+export interface ConversationListProps {
+  conversations: Conversation[];
+  currentConversationId: string | null;
+  onSelectConversation: (id: string) => void;
+  onDeleteConversation?: (id: string) => void;
+}
+
+export interface ConversationSidebarProps extends ConversationListProps {
+  onNewConversation: () => void;
+}
+
 export interface SwitchDetails {
   name: string;
   brand: string;
