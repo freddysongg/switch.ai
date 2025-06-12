@@ -1,21 +1,13 @@
 import axios, { AxiosError } from 'axios';
 
+import { AnalyticsEvent, ChatRequest, ChatResponse, RateLimit } from '@/types/api.js';
 import {
   AuthResponse,
   RegisterResponse,
   UserCredentials,
   UserUpdatePayload
 } from '@/types/auth.js';
-import {
-  AnalyticsEvent,
-  ChatMessage,
-  ChatRequest,
-  ChatResponse,
-  Conversation,
-  RateLimit,
-  SwitchSearchResult,
-  User
-} from '@/types/chat.js';
+import { ChatMessage, Conversation, SwitchSearchResult, User } from '@/types/chat.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 

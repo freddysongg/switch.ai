@@ -5,7 +5,7 @@ import { ArrowRight, Bot, Search, Sparkles, Target, TrendingUp, Users, Zap } fro
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '@/hooks/use-auth.js';
+import { useAuth } from '@/contexts/auth-context';
 
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';

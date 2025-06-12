@@ -10,7 +10,13 @@
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "preview": "vite preview",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx}\""
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "audit": "pnpm audit",
+    "audit:fix": "pnpm audit fix",
+    "audit:high": "pnpm audit --audit-level=high",
+    "audit:critical": "pnpm audit --audit-level=critical",
+    "audit:security": "pnpm audit --audit-level=high --json | node -e 'const audit = JSON.parse(require(\"fs\").readFileSync(0, \"utf8\")); const v = audit.metadata?.vulnerabilities || {}; console.log(\"Critical:\", v.critical || 0, \"High:\", v.high || 0); if ((v.critical || 0) > 0 || (v.high || 0) > 0) process.exit(1);'",
+    "mix": "npx repomix"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -47,6 +53,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "dompurify": "^3.2.6",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.15.0",
     "input-otp": "^1.4.2",

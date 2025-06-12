@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
@@ -8,6 +9,13 @@ import { ChatMessageProps } from '@/types/chat';
 import { Badge } from '@/components/ui/badge.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TransitionPanel } from '@/components/ui/transition-panel';
+
+const sanitizeHtml = (content: string): string => {
+  return DOMPurify.sanitize(content, {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'code', 'pre', 'br', 'p', 'ul', 'ol', 'li'],
+    ALLOWED_ATTR: []
+  });
+};
 
 export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessageProps) {
   const isUserMessage = message.role === 'user';
@@ -23,17 +31,19 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
       return;
     }
 
+    const sanitizedContent = sanitizeHtml(message.content);
+
     setIsTyping(true);
     let currentIndex = 0;
     const typingSpeed = 10;
-    const segmentLength = Math.max(1, Math.floor(message.content.length / (300 / typingSpeed)));
+    const segmentLength = Math.max(1, Math.floor(sanitizedContent.length / (300 / typingSpeed)));
 
     const interval = setInterval(() => {
-      if (currentIndex <= message.content.length) {
-        setDisplayContent(message.content.slice(0, currentIndex));
+      if (currentIndex <= sanitizedContent.length) {
+        setDisplayContent(sanitizedContent.slice(0, currentIndex));
         currentIndex += segmentLength;
       } else {
-        setDisplayContent(message.content);
+        setDisplayContent(sanitizedContent);
         setIsTyping(false);
         clearInterval(interval);
       }
@@ -81,9 +91,14 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
               >
                 <Card className="bg-card/80 dark:bg-card/50 backdrop-blur-sm text-card-foreground border-border hover:border-primary/30 transition-all duration-300 h-full shadow-md hover:shadow-lg">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-semibold">{switchData.name}</CardTitle>
+                    <CardTitle
+                      className="text-base font-semibold"
+                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(switchData.name || '') }}
+                    />
                     <Badge variant="outline" className="mt-1 text-xs">
-                      {switchData.brand}
+                      <span
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(switchData.brand || '') }}
+                      />
                     </Badge>
                   </CardHeader>
                   <CardContent className="text-sm space-y-3">
@@ -92,51 +107,83 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                           Actuation
                         </p>
-                        <p className="font-semibold">{switchData.actuation_weight}</p>
+                        <p
+                          className="font-semibold"
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeHtml(switchData.actuation_weight || '')
+                          }}
+                        />
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                           Bottom-out
                         </p>
-                        <p className="font-semibold">{switchData.bottom_out}</p>
+                        <p
+                          className="font-semibold"
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeHtml(switchData.bottom_out || '')
+                          }}
+                        />
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                           Pre-travel
                         </p>
-                        <p className="font-semibold">{switchData.pre_travel}</p>
+                        <p
+                          className="font-semibold"
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeHtml(switchData.pre_travel || '')
+                          }}
+                        />
                       </div>
                       <div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                           Total travel
                         </p>
-                        <p className="font-semibold">{switchData.total_travel}</p>
+                        <p
+                          className="font-semibold"
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeHtml(switchData.total_travel || '')
+                          }}
+                        />
                       </div>
                     </div>
                     <div className="space-y-1 p-2 rounded-md bg-muted/40">
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                         Spring Type:{' '}
-                        <span className="font-semibold normal-case text-foreground">
-                          {switchData.spring}
-                        </span>
+                        <span
+                          className="font-semibold normal-case text-foreground"
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeHtml(switchData.spring || '')
+                          }}
+                        />
                       </p>
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                         Stem:{' '}
-                        <span className="font-semibold normal-case text-foreground">
-                          {switchData.stem_material}
-                        </span>
+                        <span
+                          className="font-semibold normal-case text-foreground"
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeHtml(switchData.stem_material || '')
+                          }}
+                        />
                       </p>
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                         Housing:{' '}
-                        <span className="font-semibold normal-case text-foreground">
-                          {switchData.housing_material}
-                        </span>
+                        <span
+                          className="font-semibold normal-case text-foreground"
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeHtml(switchData.housing_material || '')
+                          }}
+                        />
                       </p>
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                         Factory Lubed:{' '}
-                        <span className="font-semibold normal-case text-foreground">
-                          {switchData.lubed_status}
-                        </span>
+                        <span
+                          className="font-semibold normal-case text-foreground"
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeHtml(switchData.lubed_status || '')
+                          }}
+                        />
                       </p>
                     </div>
                   </CardContent>
@@ -152,9 +199,10 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: switches.length * 0.15 + 0.1 }}
           >
-            <p className="text-xs italic text-muted-foreground leading-relaxed">
-              {message.analysis}
-            </p>
+            <p
+              className="text-xs italic text-muted-foreground leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(message.analysis || '') }}
+            />
           </motion.div>
         )}
       </>
@@ -198,10 +246,15 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
         <p className="whitespace-pre-wrap text-sm leading-relaxed">
           {isTyping && !isUserMessage ? (
             <>
-              {displayContent} <span className="animate-pulse">▍</span>
+              <span dangerouslySetInnerHTML={{ __html: displayContent }} />{' '}
+              <span className="animate-pulse">▍</span>
             </>
           ) : (
-            message.content
+            <span
+              dangerouslySetInnerHTML={{
+                __html: isUserMessage ? message.content : sanitizeHtml(message.content || '')
+              }}
+            />
           )}
         </p>
         {message.category === 'switch_comparison' && !isUserMessage && renderSwitchComparison()}

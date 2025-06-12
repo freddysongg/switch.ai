@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { SwitchDetails } from './api.js';
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -39,19 +41,6 @@ export interface ConversationSidebarProps extends ConversationListProps {
   onNewConversation: () => void;
 }
 
-export interface SwitchDetails {
-  name: string;
-  brand: string;
-  actuation_weight: string;
-  bottom_out: string;
-  pre_travel: string;
-  total_travel: string;
-  spring: string;
-  stem_material: string;
-  housing_material: string;
-  lubed_status: string;
-}
-
 export interface SwitchSearchResult {
   id: string;
   name: string;
@@ -70,34 +59,6 @@ export interface Conversation {
   category?: string;
   createdAt: Date;
   updatedAt: Date;
-}
-
-// Chat request/response interfaces
-export interface ChatRequest {
-  message: string;
-  conversationId?: string;
-}
-
-export interface ChatResponse {
-  id: string;
-  role: 'assistant';
-  content: string;
-  metadata?: Record<string, any>;
-}
-
-// Rate limiting interfaces
-export interface RateLimit {
-  userId: string;
-  endpoint: string;
-  count: number;
-  resetAt: Date;
-}
-
-// Analytics interfaces
-export interface AnalyticsEvent {
-  userId?: string;
-  eventType: string;
-  metadata: Record<string, any>;
 }
 
 export interface User {

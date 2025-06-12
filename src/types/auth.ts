@@ -1,3 +1,4 @@
+import { TokenData } from './api.js';
 import { User } from './chat.js';
 
 export interface UserCredentials {
@@ -32,9 +33,12 @@ export interface UserUpdatePayload {
 export interface AuthContextType {
   currentUser: User | null;
   authToken: string | null;
+  tokenData: TokenData | null;
   isLoading: boolean;
   login: (email: string, pass: string) => Promise<void>;
   register: (email: string, pass: string, name?: string) => Promise<void>;
   logout: () => void;
   isAdmin: () => boolean;
+  refreshToken: () => Promise<void>;
+  getTimeUntilExpiration: () => number;
 }

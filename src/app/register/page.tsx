@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useAuth } from '@/hooks/use-auth.js';
+import { useAuth } from '@/contexts/auth-context';
 
 import { Button } from '@/components/ui/button.js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.js';

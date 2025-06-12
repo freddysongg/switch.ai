@@ -5,7 +5,7 @@ import { Menu, UserCircle } from 'lucide-react';
 import * as React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '@/hooks/use-auth.js';
+import { useAuth } from '@/contexts/auth-context';
 
 import { BorderTrail } from '@/components/ui/border-trail';
 import { Button } from '@/components/ui/button.js';

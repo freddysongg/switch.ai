@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 
 import { AuthProvider } from '@/contexts/AuthContext';
-import { loadSavedTheme } from '@/lib/themeService';
+import { loadSavedTheme } from '@/lib/ThemeService';
 
 import AboutPage from '@/app/about/page';
 import { ChatInterface } from '@/app/chat/page';
@@ -12,12 +12,13 @@ import { LoginPage } from '@/app/login/page';
 import LandingPage from '@/app/marketing/page';
 import { RegisterPage } from '@/app/register/page';
 
+import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/themes/ThemeProvider.js';
 
 import './App.css';
 
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/contexts/auth-context';
 
 function AppContent() {
   const { currentUser, isLoading } = useAuth();
@@ -127,6 +128,7 @@ function App() {
           <div className="h-full w-full font-mono smooth-scroll">
             <AppContent />
             <Toaster />
+            <SonnerToaster />
           </div>
         </AuthProvider>
       </ThemeProvider>

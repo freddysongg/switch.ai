@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useAuth } from '@/hooks/use-auth.js';
+import { useAuth } from '@/contexts/auth-context';
 
 import { RegisterPage } from '@/app/register/page.js';
 

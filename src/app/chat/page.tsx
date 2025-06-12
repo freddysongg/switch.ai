@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { AI_CONFIG } from '@/config/ai.config.js';
-import { useAuth } from '@/hooks/use-auth.js';
+import { useAuth } from '@/contexts/auth-context';
 import { chatApi } from '@/lib/api.js';
 
 import { ChatMessage as ChatMessageType, Conversation } from '@/types/chat.js';
