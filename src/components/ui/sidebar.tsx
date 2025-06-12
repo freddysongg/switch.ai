@@ -3,6 +3,7 @@ import { cva, VariantProps } from 'class-variance-authority';
 import { PanelLeft } from 'lucide-react';
 import * as React from 'react';
 
+import { useSidebar } from '@/hooks/use-sidebar';
 import { cn } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
@@ -17,8 +18,6 @@ import {
 } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-
-import { useSidebar } from '@/hooks/use-sidebar';
 
 const SIDEBAR_WIDTH_MOBILE = '18rem';
 

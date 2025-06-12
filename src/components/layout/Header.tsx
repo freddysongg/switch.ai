@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { Menu, UserCircle } from 'lucide-react';
 import * as React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { useAuth } from '@/contexts/auth-context';
 
@@ -19,12 +19,11 @@ import { ScrollProgress } from '@/components/ui/scroll-progress';
 import { SmoothScrollLink } from '@/components/ui/smooth-scroll-link';
 import { ThemeSwitcherSpotlight } from '@/components/themes/ThemeSwitcherSpotlight.js';
 
-export function Header() {
+export const Header = React.memo(function Header() {
   const { currentUser } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [activeSection, setActiveSection] = React.useState('');
   const location = useLocation();
-  const navigate = useNavigate();
 
   const navItems = React.useMemo(
     () => [
@@ -99,18 +98,6 @@ export function Header() {
     }
   };
 
-  const handleGenericNav = (href: string) => {
-    if (href.startsWith('#')) {
-      if (location.pathname === '/') {
-        setActiveSection(href);
-      } else {
-        navigate(`/${href}`);
-      }
-    } else {
-      navigate(href);
-    }
-  };
-
   return (
     <header className="sticky top-0 left-0 right-0 z-40">
       <div className="relative bg-background/98 dark:bg-background/98 backdrop-blur-xl border-b border-border/40">
@@ -125,8 +112,9 @@ export function Header() {
                 src="/assets/icons/switch.ai v2 Logo.png"
                 alt="switch.ai"
                 className="h-8 w-8"
+                style={{ willChange: 'transform' }}
                 whileHover={{ rotate: [0, 10, -10, 0], scale: 1.1 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.4 }}
               />
               <span className="font-bold lowercase text-foreground text-xl">switch.ai</span>
             </Link>
@@ -152,9 +140,7 @@ export function Header() {
                       <motion.div
                         layoutId="active-tab-indicator-desktop"
                         className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                       />
                     )}
                   </SmoothScrollLink>
@@ -170,9 +156,10 @@ export function Header() {
                 className="relative"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                style={{ willChange: 'transform' }}
               >
                 <div className="relative w-10 h-10 rounded-full bg-zinc-800 dark:bg-zinc-700 flex items-center justify-center border border-zinc-700 dark:border-zinc-600">
-                  <motion.div /* ... Border trail ... */ />
+                  <motion.div />
                   <div className="absolute inset-[1px] bg-zinc-800 dark:bg-zinc-700 rounded-full" />
                   <Button
                     asChild
@@ -193,14 +180,18 @@ export function Header() {
             ) : (
               <>
                 <div className="hidden sm:flex items-center gap-2">
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    style={{ willChange: 'transform' }}
+                  >
                     <Button
                       variant="ghost"
                       asChild
                       size="sm"
                       className="text-foreground/80 hover:text-foreground hover:bg-foreground/10 px-4 py-2 text-sm rounded-lg"
                     >
-                      <Link to="/login">Log In</Link>
+                      <Link to="/login">log in</Link>
                     </Button>
                   </motion.div>
                   <BorderTrail className="rounded-lg">
@@ -208,8 +199,9 @@ export function Header() {
                       asChild
                       size="sm"
                       className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 text-sm rounded-lg font-medium"
+                      style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
                     >
-                      <Link to="/register">Sign Up</Link>
+                      <Link to="/register">sign up</Link>
                     </Button>
                   </BorderTrail>
                 </div>
@@ -230,12 +222,12 @@ export function Header() {
                     >
                       <DropdownMenuItem asChild>
                         <Link to="/login" className="font-mono">
-                          Log In
+                          log in
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link to="/register" className="font-mono">
-                          Sign Up
+                          sign up
                         </Link>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -261,26 +253,17 @@ export function Header() {
                     className="bg-popover text-popover-foreground border-border w-48"
                   >
                     {navItems.map((item) => (
-                      <DropdownMenuItem
-                        key={item.href}
-                        onSelect={() => {
-                          setIsMobileMenuOpen(false);
-                          if (location.pathname === '/' && item.href.startsWith('#')) {
+                      <DropdownMenuItem key={item.href} asChild>
+                        <SmoothScrollLink
+                          to={item.href}
+                          className="w-full"
+                          onClick={() => {
                             setActiveSection(item.href);
-                            const targetElement = document.getElementById(item.href.substring(1));
-                            if (targetElement) {
-                              const headerOffset = 80;
-                              const elementPosition =
-                                targetElement.getBoundingClientRect().top + window.pageYOffset;
-                              const offsetPosition = elementPosition - headerOffset;
-                              window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
-                            }
-                          } else {
-                            handleGenericNav(item.href);
-                          }
-                        }}
-                      >
-                        <span className="font-mono py-2">{item.name}</span>
+                            setIsMobileMenuOpen(false);
+                          }}
+                        >
+                          {item.name}
+                        </SmoothScrollLink>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -292,4 +275,6 @@ export function Header() {
       </div>
     </header>
   );
-}
+});
+
+Header.displayName = 'Header';

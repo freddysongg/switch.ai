@@ -194,35 +194,174 @@ export interface ChatRequest {
   conversationId?: string;
 }
 
-export interface SwitchDetails {
-  name: string;
-  brand: string;
-  actuation_weight: string;
-  bottom_out: string;
-  pre_travel: string;
-  total_travel: string;
-  spring: string;
-  stem_material: string;
-  housing_material: string;
-  lubed_status: string;
+export interface SwitchSpecifications {
+  switchName?: string;
+  manufacturer?: string;
+  type?: string;
+  topHousing?: string;
+  bottomHousing?: string;
+  stem?: string;
+  mount?: string;
+  spring?: string;
+  actuationForceG?: number;
+  bottomOutForceG?: number;
+  preTravelMm?: number;
+  totalTravelMm?: number;
+  factoryLubed?: string;
+  additionalNotes?: string;
 }
 
-export interface SwitchComparison {
-  switch1: SwitchDetails;
-  switch2: SwitchDetails;
-  switch3?: SwitchDetails;
-  switch4?: SwitchDetails;
-  switch5?: SwitchDetails;
+export interface MaterialAnalysis {
+  materialComposition?: string;
+  propertiesExplanation?: string;
+  switchApplications?: string;
+  soundImpact?: string;
+  feelImpact?: string;
+  performanceImpact?: string;
 }
 
-export interface ChatResponse {
+export interface ExampleSwitch {
+  switchName?: string;
+  briefOverview?: string;
+  specifications?: SwitchSpecifications;
+  soundProfile?: string;
+  relevanceToMaterial?: string;
+}
+
+export interface ComparisonSwitchData {
+  switchName?: string;
+  specifications?: SwitchSpecifications;
+  individualAnalysis?: string;
+  recommendations?: string[];
+}
+
+export interface AnalysisResponse {
+  overview: string;
+  technicalSpecifications?: SwitchSpecifications;
+  soundProfile?: string;
+  typingFeel?: string;
+  typingExperience?: string;
+  recommendations?: string[];
+  contextualConnection?: string;
+  specificApplication?: string;
+  implication?: string;
+  comparedSwitches?: {
+    [switchName: string]: ComparisonSwitchData;
+  };
+  comparativeAnalysis?: {
+    feelingTactility?:
+      | {
+          description?: string;
+          keyDifferences?: string;
+          userImpact?: string;
+        }
+      | string;
+    soundProfile?:
+      | {
+          description?: string;
+          acousticDifferences?: string;
+          environmentalConsiderations?: string;
+        }
+      | string;
+    buildMaterialComposition?:
+      | {
+          materialComparison?: string;
+          durabilityAssessment?: string;
+          modificationPotential?: string;
+        }
+      | string;
+    performanceAspects?:
+      | {
+          gamingPerformance?: string;
+          typingPerformance?: string;
+          consistencyReliability?: string;
+          fatigueFactors?: string;
+        }
+      | string;
+  };
+  conclusion?:
+    | {
+        primaryDifferences?: string;
+        overallAssessment?: string;
+        decisionGuidance?: string;
+      }
+    | string;
+  switchRecommendations?: {
+    [switchName: string]: string[];
+  };
+  materialAnalysis?: MaterialAnalysis;
+  materialCombinationEffects?: string;
+  exampleSwitches?: ExampleSwitch[];
+  housingMaterials?: string;
+  forceWeighting?: string;
+  travelActuation?: string;
+  useCaseSuitability?: string;
+  buildQuality?: string;
+  durability?: string;
+  modifiability?: string;
+  compatibility?: string;
+  frequencyResponse?: string;
+  acousticProperties?: string;
+  tactileCharacteristics?: string;
+  ergonomicConsiderations?: string;
+  manufacturingQuality?: string;
+  analysis?: string;
+  analysisConfidence?: string;
+  dataSource?: string;
+  additionalNotes?: string;
+  specifications?: unknown;
+  feelAndExperience?: unknown;
+  comparison?: unknown;
+  error?: AnalysisError;
+  dataConflictResolution?: {
+    conflictsFound: number;
+    resolutionStrategy: string;
+    conflicts: Array<{
+      switchName: string;
+      conflicts: Array<{
+        field: string;
+        databaseValue: unknown;
+        llmValue: unknown;
+        resolution: 'database' | 'llm' | 'both';
+        reason: string;
+      }>;
+    }>;
+    note: string;
+  };
+}
+
+export interface AnalysisResponseWithExtras extends AnalysisResponse {
+  requestId?: string;
+  timestamp?: string;
+  conversationId?: string;
+}
+
+export interface AnalysisError {
+  code:
+    | 'INVALID_QUERY'
+    | 'INTENT_RECOGNITION_FAILED'
+    | 'DATABASE_ERROR'
+    | 'LLM_REQUEST_FAILED'
+    | 'LLM_RESPONSE_INVALID'
+    | 'RESPONSE_VALIDATION_FAILED'
+    | 'TIMEOUT'
+    | 'RATE_LIMITED'
+    | 'INTERNAL_ERROR'
+    | 'NETWORK_ERROR'
+    | 'AUTHENTICATION_ERROR'
+    | 'QUOTA_EXCEEDED';
+  message: string;
+  step?: string;
+  details?: unknown;
+  recoverable: boolean;
+  timestamp?: Date;
+  retryDelay?: number;
+}
+
+export interface ChatResponse extends AnalysisResponse {
   id: string;
   role: 'assistant';
   content: string;
-  metadata?: ChatMetadata;
-  category?: string;
-  comparison?: SwitchComparison;
-  analysis?: string;
 }
 
 // =============================================================================

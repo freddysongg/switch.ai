@@ -6,7 +6,6 @@ import * as React from 'react';
 import { applyTheme, AppTheme, availableAppThemes, themeColorPreviews } from '@/lib/ThemeService';
 import { cn } from '@/lib/utils.js';
 
-import { Button } from '@/components/ui/button.js';
 import {
   Command,
   CommandEmpty,
@@ -15,7 +14,8 @@ import {
   CommandItem,
   CommandList
 } from '@/components/ui/command.js';
-import { Dialog, DialogContent } from '@/components/ui/dialog.js';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog.js';
+import { GlowButton } from '@/components/ui/glow-button.js';
 
 const getThemePreviewColors = (themeId: string): Required<AppTheme['previewColors']> => {
   const specificPreview = themeColorPreviews[themeId];
@@ -83,17 +83,20 @@ export function ThemeSwitcherSpotlight() {
 
   return (
     <>
-      <Button
+      <GlowButton
         variant="outline"
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-2 sm:px-3 font-mono text-xs sm:text-sm"
+        className="flex items-center gap-2 px-2 sm:px-3 font-mono text-xs sm:text-sm text:text-color"
+        style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
+        glowColor={`color-mix(in srgb, var(--main-color) 15%, transparent)`}
+        glowIntensity={0.6}
       >
         <Palette className="h-4 w-4" />
         <span className="hidden sm:inline">{activeThemeName}</span>
         <kbd className="ml-auto pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 sm:flex">
           <span className="text-xs">⌘</span>k
         </kbd>
-      </Button>
+      </GlowButton>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
@@ -112,6 +115,10 @@ export function ThemeSwitcherSpotlight() {
               'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace'
           }}
         >
+          <DialogTitle className="sr-only">Theme Selector</DialogTitle>
+          <DialogDescription className="sr-only">
+            Select a new theme for the application.
+          </DialogDescription>
           <Command className="font-mono">
             <div className="flex items-center border-b border-border px-4 py-3 rounded-t-lg">
               <CommandInput
@@ -159,7 +166,7 @@ export function ThemeSwitcherSpotlight() {
                         </div>
                         <div className="flex flex-col">
                           <span className="text-sm font-medium">{theme.name}</span>
-                          <span className="text-xs text-foreground/70">
+                          <span className="text-xs text:text-color">
                             {theme.baseMode} • {theme.id}
                           </span>
                         </div>

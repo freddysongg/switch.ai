@@ -75,12 +75,12 @@ export function Footer() {
           </div>
           <div className="flex items-center gap-6 text-xs text-muted-foreground">
             <span>© {new Date().getFullYear()} switch.ai. all rights reserved.</span>
-            <a href="/privacy" className="hover:text-foreground transition-colors">
+            {/* <a href="/privacy" className="hover:text-foreground transition-colors">
               privacy
             </a>
             <a href="/terms" className="hover:text-foreground transition-colors">
               terms
-            </a>
+            </a> */}
           </div>
         </div>
       </div>

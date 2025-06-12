@@ -9,8 +9,7 @@ export type {
   ValidationError,
   RateLimitError,
   AuthenticationError,
-  TokenData,
-  SwitchDetails
+  TokenData
 } from './api.js';
 
 export type { AuthResponse, RegisterResponse, UserCredentials, AuthContextType } from './auth.js';

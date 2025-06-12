@@ -1,22 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { SwitchDetails } from './api.js';
+import { AnalysisResponse } from './api';
+
+export type UserRole = 'user' | 'assistant';
 
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: UserRole;
   content: string;
-  metadata?: Record<string, any>;
+  timestamp: string;
+  metadata: Record<string, unknown>;
+  analysis?: AnalysisResponse;
   createdAt: Date;
-  category?: string;
-  timestamp?: string;
-  comparison?: {
-    switch1: SwitchDetails;
-    switch2: SwitchDetails;
-    switch3?: SwitchDetails;
-    switch4?: SwitchDetails;
-    switch5?: SwitchDetails;
-  };
-  analysis?: string;
 }
 
 export interface ChatMessageProps {

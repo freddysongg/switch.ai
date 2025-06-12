@@ -1,14 +1,23 @@
+'use client';
+
 import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
 import { cn } from '@/lib/utils.js';
 
-import { ChatMessageProps } from '@/types/chat';
+import type { ComparisonSwitchData } from '@/types/api';
+import type { ChatMessage as ChatMessageType, User } from '@/types/chat';
 
 import { Badge } from '@/components/ui/badge.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TransitionPanel } from '@/components/ui/transition-panel';
+
+export interface ChatMessageProps {
+  message: ChatMessageType;
+  isLastMessage: boolean;
+  currentUser?: User | null;
+}
 
 const sanitizeHtml = (content: string): string => {
   return DOMPurify.sanitize(content, {
@@ -23,9 +32,10 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
   const [isTyping, setIsTyping] = useState(
     !isUserMessage && message.content && message.content.length > 0
   );
+  const isLoading = message.id === 'loading' && message.metadata?.loadingSteps;
 
   useEffect(() => {
-    if (isUserMessage || !message.content) {
+    if (isUserMessage || !message.content || isLoading) {
       setDisplayContent(message.content);
       setIsTyping(false);
       return;
@@ -73,15 +83,48 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
     }
   };
 
+  const renderProgressiveLoader = () => {
+    if (!isLoading) return null;
+    const steps = message.metadata?.loadingSteps as string[];
+
+    return (
+      <div className="p-4 space-y-2">
+        {steps.map((step, index) => (
+          <motion.div
+            key={index}
+            className="flex items-center gap-2 text-sm"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.2 }}
+          >
+            <span className="text-main-color">✓</span>
+            <span>{step}</span>
+          </motion.div>
+        ))}
+      </div>
+    );
+  };
+
+  const getConclusionText = (conclusion: unknown): string => {
+    if (!conclusion) return '';
+    if (typeof conclusion === 'string') return conclusion;
+    if (
+      typeof conclusion === 'object' &&
+      conclusion !== null &&
+      'overallAssessment' in conclusion
+    ) {
+      return (conclusion as { overallAssessment: string }).overallAssessment || '';
+    }
+    return '';
+  };
+
   const renderSwitchComparison = () => {
-    if (!message.comparison) return null;
-    const switches = Object.entries(message.comparison)
-      .filter(([key]) => key.startsWith('switch'))
-      .map(([, value]) => value);
+    if (!message.analysis?.comparedSwitches) return null;
+    const switches: ComparisonSwitchData[] = Object.values(message.analysis.comparedSwitches);
 
     return (
       <>
-        <div className="space-y-6 mt-4 -mx-1">
+        <div className="space-y-6 mt-6 -mx-1">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {switches.map((switchData, index) => (
               <TransitionPanel
@@ -89,99 +132,168 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
                 delay={index * 0.15}
                 direction={index % 2 === 0 ? 'left' : 'right'}
               >
-                <Card className="bg-card/80 dark:bg-card/50 backdrop-blur-sm text-card-foreground border-border hover:border-primary/30 transition-all duration-300 h-full shadow-md hover:shadow-lg">
+                <Card
+                  className="backdrop-blur-sm h-full shadow-lg hover:shadow-xl transition-all duration-300"
+                  style={{
+                    backgroundColor: 'var(--sub-color)',
+                    color: 'var(--text-color)',
+                    borderColor: 'var(--sub-alt-color)'
+                  }}
+                >
                   <CardHeader className="pb-3">
                     <CardTitle
                       className="text-base font-semibold"
-                      dangerouslySetInnerHTML={{ __html: sanitizeHtml(switchData.name || '') }}
+                      style={{ color: 'var(--text-color)' }}
+                      dangerouslySetInnerHTML={{
+                        __html: sanitizeHtml(switchData.specifications?.switchName || '')
+                      }}
                     />
-                    <Badge variant="outline" className="mt-1 text-xs">
+                    <Badge
+                      variant="outline"
+                      className="mt-1 text-xs"
+                      style={{
+                        borderColor: 'var(--sub-alt-color)',
+                        color: 'var(--text-color)'
+                      }}
+                    >
                       <span
-                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(switchData.brand || '') }}
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizeHtml(switchData.specifications?.manufacturer || '')
+                        }}
                       />
                     </Badge>
                   </CardHeader>
                   <CardContent className="text-sm space-y-3">
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 p-2 rounded-md bg-muted/40">
+                    <div
+                      className="grid grid-cols-2 gap-x-3 gap-y-1 p-3 rounded-md"
+                      style={{ backgroundColor: 'var(--bg-color)' }}
+                    >
                       <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                        <p
+                          className="text-[10px] uppercase tracking-wider font-medium"
+                          style={{ color: 'var(--sub-alt-color)' }}
+                        >
                           Actuation
                         </p>
                         <p
                           className="font-semibold"
+                          style={{ color: 'var(--text-color)' }}
                           dangerouslySetInnerHTML={{
-                            __html: sanitizeHtml(switchData.actuation_weight || '')
+                            __html: sanitizeHtml(
+                              `${switchData.specifications?.actuationForceG || ''}g`
+                            )
                           }}
                         />
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                        <p
+                          className="text-[10px] uppercase tracking-wider font-medium"
+                          style={{ color: 'var(--sub-alt-color)' }}
+                        >
                           Bottom-out
                         </p>
                         <p
                           className="font-semibold"
+                          style={{ color: 'var(--text-color)' }}
                           dangerouslySetInnerHTML={{
-                            __html: sanitizeHtml(switchData.bottom_out || '')
+                            __html: sanitizeHtml(
+                              `${switchData.specifications?.bottomOutForceG || ''}g`
+                            )
                           }}
                         />
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                        <p
+                          className="text-[10px] uppercase tracking-wider font-medium"
+                          style={{ color: 'var(--sub-alt-color)' }}
+                        >
                           Pre-travel
                         </p>
                         <p
                           className="font-semibold"
+                          style={{ color: 'var(--text-color)' }}
                           dangerouslySetInnerHTML={{
-                            __html: sanitizeHtml(switchData.pre_travel || '')
+                            __html: sanitizeHtml(
+                              `${switchData.specifications?.preTravelMm || ''}mm`
+                            )
                           }}
                         />
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                        <p
+                          className="text-[10px] uppercase tracking-wider font-medium"
+                          style={{ color: 'var(--sub-alt-color)' }}
+                        >
                           Total travel
                         </p>
                         <p
                           className="font-semibold"
+                          style={{ color: 'var(--text-color)' }}
                           dangerouslySetInnerHTML={{
-                            __html: sanitizeHtml(switchData.total_travel || '')
+                            __html: sanitizeHtml(
+                              `${switchData.specifications?.totalTravelMm || ''}mm`
+                            )
                           }}
                         />
                       </div>
                     </div>
-                    <div className="space-y-1 p-2 rounded-md bg-muted/40">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                    <div
+                      className="space-y-1 p-3 rounded-md"
+                      style={{ backgroundColor: 'var(--bg-color)' }}
+                    >
+                      <p
+                        className="text-[10px] uppercase tracking-wider font-medium"
+                        style={{ color: 'var(--sub-alt-color)' }}
+                      >
                         Spring Type:{' '}
                         <span
-                          className="font-semibold normal-case text-foreground"
+                          className="font-semibold normal-case"
+                          style={{ color: 'var(--text-color)' }}
                           dangerouslySetInnerHTML={{
-                            __html: sanitizeHtml(switchData.spring || '')
+                            __html: sanitizeHtml(switchData.specifications?.spring || '')
                           }}
                         />
                       </p>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                      <p
+                        className="text-[10px] uppercase tracking-wider font-medium"
+                        style={{ color: 'var(--sub-alt-color)' }}
+                      >
                         Stem:{' '}
                         <span
-                          className="font-semibold normal-case text-foreground"
+                          className="font-semibold normal-case"
+                          style={{ color: 'var(--text-color)' }}
                           dangerouslySetInnerHTML={{
-                            __html: sanitizeHtml(switchData.stem_material || '')
+                            __html: sanitizeHtml(switchData.specifications?.stem || '')
                           }}
                         />
                       </p>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                      <p
+                        className="text-[10px] uppercase tracking-wider font-medium"
+                        style={{ color: 'var(--sub-alt-color)' }}
+                      >
                         Housing:{' '}
                         <span
-                          className="font-semibold normal-case text-foreground"
+                          className="font-semibold normal-case"
+                          style={{ color: 'var(--text-color)' }}
                           dangerouslySetInnerHTML={{
-                            __html: sanitizeHtml(switchData.housing_material || '')
+                            __html: sanitizeHtml(
+                              `${switchData.specifications?.topHousing || ''} / ${
+                                switchData.specifications?.bottomHousing || ''
+                              }`
+                            )
                           }}
                         />
                       </p>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
+                      <p
+                        className="text-[10px] uppercase tracking-wider font-medium"
+                        style={{ color: 'var(--sub-alt-color)' }}
+                      >
                         Factory Lubed:{' '}
                         <span
-                          className="font-semibold normal-case text-foreground"
+                          className="font-semibold normal-case"
+                          style={{ color: 'var(--text-color)' }}
                           dangerouslySetInnerHTML={{
-                            __html: sanitizeHtml(switchData.lubed_status || '')
+                            __html: sanitizeHtml(switchData.specifications?.factoryLubed || '')
                           }}
                         />
                       </p>
@@ -192,16 +304,20 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
             ))}
           </div>
         </div>
-        {!isUserMessage && message.comparison && message.analysis && (
+        {!isUserMessage && message.analysis?.conclusion && (
           <motion.div
-            className="mt-4 pt-3 border-t border-border/30"
+            className="mt-6 pt-4 border-t"
+            style={{ borderColor: 'var(--sub-alt-color)' }}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: switches.length * 0.15 + 0.1 }}
           >
             <p
-              className="text-xs italic text-muted-foreground leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(message.analysis || '') }}
+              className="text-sm italic leading-relaxed"
+              style={{ color: 'var(--sub-alt-color)' }}
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(getConclusionText(message.analysis.conclusion))
+              }}
             />
           </motion.div>
         )}
@@ -217,7 +333,7 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
       animate="visible"
       exit="hidden"
       className={cn(
-        'flex w-full items-start gap-x-3 py-3',
+        'flex w-full items-start gap-x-4 py-4',
         isUserMessage ? 'justify-end pl-8 sm:pl-12' : 'justify-start pr-8 sm:pr-12'
       )}
       id={isLastMessage ? 'last-message' : undefined}
@@ -226,28 +342,38 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
         <motion.img
           src="/assets/icons/switch.ai v2 Logo.png"
           alt="AI"
-          className="h-6 w-6 rounded-full flex-shrink-0 mt-1 opacity-80"
+          className="h-7 w-7 rounded-full flex-shrink-0 mt-1 opacity-90"
           initial={{ scale: 0.5, opacity: 0 }}
-          animate={{ scale: 1, opacity: 0.8 }}
+          animate={{ scale: 1, opacity: 0.9 }}
           transition={{ delay: 0.2 }}
         />
       )}
       <div
         className={cn(
-          'group rounded-xl px-3.5 py-2.5 max-w-[85%] sm:max-w-[75%] shadow-sm transition-colors duration-200',
-          isUserMessage
-            ? 'bg-primary text-primary-foreground rounded-br-none'
-            : 'bg-card text-card-foreground border border-border/70 rounded-bl-none',
-          message.metadata?.error
-            ? 'bg-destructive/20 border-destructive text-destructive-foreground'
-            : ''
+          'group rounded-xl px-4 py-3 max-w-[85%] sm:max-w-[75%] shadow-lg transition-all duration-200',
+          isUserMessage ? 'rounded-br-none' : 'rounded-bl-none backdrop-blur-sm',
+          message.metadata?.error ? 'opacity-80' : ''
         )}
+        style={{
+          backgroundColor: message.metadata?.error
+            ? 'var(--sub-color)'
+            : isUserMessage
+              ? 'var(--main-color)'
+              : 'var(--sub-color)',
+          color: isUserMessage ? 'var(--bg-color)' : 'var(--text-color)',
+          borderColor: 'var(--sub-alt-color)',
+          borderWidth: isUserMessage ? '0px' : '1px'
+        }}
       >
         <p className="whitespace-pre-wrap text-sm leading-relaxed">
-          {isTyping && !isUserMessage ? (
+          {isLoading ? (
+            renderProgressiveLoader()
+          ) : isTyping && !isUserMessage ? (
             <>
               <span dangerouslySetInnerHTML={{ __html: displayContent }} />{' '}
-              <span className="animate-pulse">▍</span>
+              <span className="animate-pulse" style={{ color: 'var(--sub-alt-color)' }}>
+                ▍
+              </span>
             </>
           ) : (
             <span
@@ -257,10 +383,17 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
             />
           )}
         </p>
-        {message.category === 'switch_comparison' && !isUserMessage && renderSwitchComparison()}
+        {!isUserMessage && message.analysis?.comparedSwitches && renderSwitchComparison()}
       </div>
       {isUserMessage && (
-        <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-xs mt-1 flex-shrink-0">
+        <div
+          className="h-7 w-7 rounded-full flex items-center justify-center text-sm mt-1 flex-shrink-0 border"
+          style={{
+            backgroundColor: 'var(--sub-color)',
+            color: 'var(--text-color)',
+            borderColor: 'var(--sub-alt-color)'
+          }}
+        >
           {currentUser?.name?.charAt(0).toUpperCase() || 'U'}
         </div>
       )}

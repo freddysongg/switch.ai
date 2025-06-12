@@ -82,7 +82,12 @@ export default function LandingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 1.5 }}
               >
-                <GlowButton size="lg" onClick={handleTryTheApp} className="text-base px-8">
+                <GlowButton
+                  size="lg"
+                  onClick={handleTryTheApp}
+                  className="text-base px-8"
+                  style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
+                >
                   try the app
                 </GlowButton>
                 <Button variant="link" size="lg" asChild className="text-base text-foreground">
@@ -248,6 +253,7 @@ export default function LandingPage() {
                   size="lg"
                   className="w-full sm:w-auto text-base"
                   glowIntensity={0.8}
+                  style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
                 >
                   get started
                 </GlowButton>

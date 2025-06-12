@@ -1,8 +1,10 @@
+'use client';
+
 import { motion } from 'framer-motion';
 import { AlertTriangle, SendHorizontal } from 'lucide-react';
-import { FormEvent, KeyboardEvent, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 
-import { ChatInputProps } from '@/types/chat.js';
+import type { ChatInputProps } from '@/types/chat.js';
 
 import { GlowButton } from '@/components/ui/glow-button.js';
 import { Textarea } from '@/components/ui/textarea.js';
@@ -29,15 +31,35 @@ interface ValidationResult {
 
 export function ChatInput({ onSendMessage, isLoading = false }: ChatInputProps) {
   const [message, setMessage] = useState('');
+  const [currentMainColor, setCurrentMainColor] = useState('rgb(20 184 166)');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const updateMainColor = () => {
+      const mainColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--main-color')
+        ?.trim();
+      if (mainColor) {
+        setCurrentMainColor(mainColor);
+      }
+    };
+
+    updateMainColor();
+
+    const observer = new MutationObserver(updateMainColor);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme', 'class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const validateMessage = (text: string): ValidationResult => {
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    if (text.length < VALIDATION_RULES.MIN_LENGTH) {
-      errors.push('Message cannot be empty');
-    } else if (text.length > VALIDATION_RULES.MAX_LENGTH) {
+    if (text.length > VALIDATION_RULES.MAX_LENGTH) {
       errors.push(`Message must be under ${VALIDATION_RULES.MAX_LENGTH} characters`);
     } else if (text.length > VALIDATION_RULES.MAX_LENGTH * 0.9) {
       warnings.push('Message is getting close to the character limit');
@@ -85,7 +107,12 @@ export function ChatInput({ onSendMessage, isLoading = false }: ChatInputProps) 
   return (
     <motion.form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-2 p-3 md:p-4 bg-muted/60 dark:bg-muted/30 border-t border-border/80"
+      className="flex flex-col gap-2 p-4 md:p-6 border-t backdrop-blur-sm"
+      style={{
+        backgroundColor: 'var(--bg-color)',
+        borderColor: 'var(--sub-color)',
+        color: 'var(--text-color)'
+      }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
@@ -97,13 +124,24 @@ export function ChatInput({ onSendMessage, isLoading = false }: ChatInputProps) 
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
-          className={`min-h-[52px] sm:min-h-[60px] resize-none pr-12 py-3 bg-muted/60 dark:bg-muted/30 border rounded-xl focus-visible:ring-2 text-muted-foreground placeholder:text-muted-foreground/70 shadow-sm transition-colors ${
-            hasErrors
-              ? 'border-destructive focus-visible:ring-destructive/40'
-              : hasWarnings
-                ? 'border-yellow-500 focus-visible:ring-yellow-500/40'
-                : 'focus-visible:ring-primary/40 dark:focus-visible:ring-primary/60'
-          }`}
+          className="min-h-[60px] sm:min-h-[70px] resize-none pr-14 py-4 border rounded-xl focus-visible:ring-2 shadow-lg backdrop-blur-sm transition-colors"
+          style={
+            {
+              backgroundColor: 'var(--bg-color)',
+              borderColor: hasErrors
+                ? 'var(--sub-color)'
+                : hasWarnings
+                  ? 'var(--sub-color)'
+                  : 'var(--sub-alt-color)',
+              color: 'var(--text-color)',
+              '--tw-ring-color': hasErrors
+                ? 'var(--sub-color)'
+                : hasWarnings
+                  ? 'var(--sub-color)'
+                  : `color-mix(in srgb, var(--sub-color) 40%, transparent)`,
+              '--tw-placeholder-color': 'var(--sub-alt-color)'
+            } as React.CSSProperties
+          }
           disabled={isLoading}
           rows={1}
         />
@@ -111,38 +149,47 @@ export function ChatInput({ onSendMessage, isLoading = false }: ChatInputProps) 
           type="submit"
           size="icon"
           disabled={isLoading || !message.trim() || !validation.isValid}
-          className="absolute right-2.5 bottom-2.5 h-8 w-8 sm:h-9 sm:w-9"
-          glowColor={hasErrors ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'}
-          glowIntensity={hasErrors ? 0.3 : 0.6}
+          className="absolute right-3 bottom-3 h-10 w-10 sm:h-11 sm:w-11"
+          style={
+            {
+              backgroundColor: hasErrors ? 'rgba(239, 68, 68, 0.8)' : 'var(--main-color)',
+              color: 'var(--bg-color)',
+              '--hover-bg': hasErrors
+                ? 'rgba(239, 68, 68, 0.9)'
+                : `color-mix(in srgb, var(--main-color) 90%, white)`,
+              '--glow-color': hasErrors ? 'rgba(239, 68, 68, 1)' : 'var(--main-color)'
+            } as React.CSSProperties
+          }
+          glowColor={hasErrors ? 'rgb(239 68 68)' : currentMainColor}
+          glowIntensity={hasErrors ? 0.3 : 0.8}
         >
-          <SendHorizontal className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
-          <span>send message</span>
+          <SendHorizontal className="h-5 w-5" />
+          <span className="sr-only">send message</span>
         </GlowButton>
       </div>
 
-      {/* Validation feedback and character counter */}
       <div className="flex items-center justify-between text-xs">
         <div className="flex flex-col gap-1">
-          {/* Error messages */}
           {validation.errors.map((error, index) => (
             <motion.div
               key={`error-${index}`}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-1.5 text-destructive"
+              className="flex items-center gap-1.5"
+              style={{ color: 'rgba(239, 68, 68, 0.9)' }}
             >
               <AlertTriangle className="h-3 w-3" />
               <span>{error}</span>
             </motion.div>
           ))}
 
-          {/* Warning messages */}
           {validation.warnings.map((warning, index) => (
             <motion.div
               key={`warning-${index}`}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-1.5 text-yellow-600 dark:text-yellow-400"
+              className="flex items-center gap-1.5"
+              style={{ color: 'rgba(245, 158, 11, 0.9)' }}
             >
               <AlertTriangle className="h-3 w-3" />
               <span>{warning}</span>
@@ -150,15 +197,15 @@ export function ChatInput({ onSendMessage, isLoading = false }: ChatInputProps) 
           ))}
         </div>
 
-        {/* Character counter */}
         <div
-          className={`transition-colors ${
-            isOverLimit
-              ? 'text-destructive'
+          className="transition-colors"
+          style={{
+            color: isOverLimit
+              ? 'rgba(239, 68, 68, 0.9)'
               : isNearLimit
-                ? 'text-yellow-600 dark:text-yellow-400'
-                : 'text-muted-foreground'
-          }`}
+                ? 'rgba(245, 158, 11, 0.9)'
+                : 'var(--sub-color)'
+          }}
         >
           {message.length}/{VALIDATION_RULES.MAX_LENGTH}
         </div>

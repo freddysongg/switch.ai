@@ -68,7 +68,7 @@ export default function AboutPage() {
 
           <section className="text-center fade-in-section opacity-0">
             <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-6">
-              connect with the creator
+              connect with me
             </h2>
             <p className="text-muted-foreground mb-4">
               have questions, feedback, or just want to chat about keyboards?

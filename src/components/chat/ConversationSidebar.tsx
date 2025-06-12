@@ -1,16 +1,47 @@
-import { motion } from 'framer-motion';
-import { ChevronLeft, MessageSquare, PlusCircle, Trash2, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  ChevronLeft,
+  Clock,
+  MessageSquare,
+  PlusCircle,
+  Search,
+  Sparkles,
+  Trash2
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useIsMobile } from '@/hooks/use-mobile.js';
 import { cn } from '@/lib/utils.js';
 
 import { ConversationListProps, ConversationSidebarProps } from '@/types/chat';
 
-import { BorderTrail } from '@/components/ui/border-trail.js';
-import { Button } from '@/components/ui/button.js';
+import { GlowButton } from '@/components/ui/glow-button.js';
+import { Input } from '@/components/ui/input.js';
 import { ScrollArea } from '@/components/ui/scroll-area.js';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet.js';
+
+function useThemeColors() {
+  const [hoverColor, setHoverColor] = useState('rgba(0, 0, 0, 0.05)');
+
+  useEffect(() => {
+    const updateColors = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setHoverColor(isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)');
+    };
+
+    updateColors();
+
+    const observer = new MutationObserver(updateColors);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return { hoverColor };
+}
 
 export function ConversationSidebarDesktop({
   conversations,
@@ -20,7 +51,12 @@ export function ConversationSidebarDesktop({
   onDeleteConversation
 }: ConversationSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const sidebarRef = useRef<HTMLDivElement>(null);
+
+  const filteredConversations = conversations.filter((conv) =>
+    conv.title?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleToggle = () => {
     setIsCollapsed(!isCollapsed);
@@ -30,94 +66,181 @@ export function ConversationSidebarDesktop({
     <>
       <motion.div
         ref={sidebarRef}
-        className="hidden md:flex h-full flex-col border-r bg-sidebar text-sidebar-foreground shadow-md"
-        animate={{ width: isCollapsed ? 0 : 240 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="relative hidden md:flex h-full flex-col"
+        layout
+        style={{ willChange: 'width' }}
+        animate={{ width: isCollapsed ? 80 : 320 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 1,duration: 0.6 }}
       >
-        <div className="p-3 border-b border-sidebar-border flex items-center justify-between h-14 flex-shrink-0 overflow-hidden">
-          <motion.div
-            className="flex items-center gap-2"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: isCollapsed ? 0 : 1 }}
-            transition={{ duration: 0.2, delay: isCollapsed ? 0 : 0.1 }}
-          >
-            <MessageSquare className="h-5 w-5 shrink-0" />
-            <h2 className="text-lg font-semibold whitespace-nowrap">Chats</h2>
-          </motion.div>
-          <div className="flex items-center gap-1">
-            {!isCollapsed ? (
-              <BorderTrail className="rounded-md">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={onNewConversation}
-                  aria-label="New Chat"
-                >
-                  <PlusCircle className="h-5 w-5" />
-                </Button>
-              </BorderTrail>
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={onNewConversation}
-                disabled={isCollapsed}
-                aria-label="New Chat"
-              >
-                <PlusCircle className="h-5 w-5" />
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={handleToggle}
-              aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+        <AnimatePresence mode="wait">
+          {!isCollapsed && (
+            <motion.div
+              key="expanded"
+              className="absolute inset-4 top-32"
+              initial={{ opacity: 0, scale: 0.96, x: -20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.96, x: -20 }}
+              transition={{
+                type: 'spring',
+                stiffness: 300,
+                damping: 30,
+                duration: 0.4
+              }}
             >
-              <ChevronLeft
-                className={cn(
-                  'h-5 w-5 transition-transform duration-200',
-                  isCollapsed && 'rotate-180'
-                )}
-              />
-            </Button>
-          </div>
-        </div>
-        <motion.div
-          className="flex-grow overflow-hidden"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: isCollapsed ? 0 : 1 }}
-          transition={{ duration: 0.2, delay: isCollapsed ? 0 : 0.1 }}
-        >
-          <ConversationList
-            conversations={conversations}
-            currentConversationId={currentConversationId}
-            onSelectConversation={onSelectConversation}
-            onDeleteConversation={onDeleteConversation}
-          />
-        </motion.div>
+              <motion.div
+                className="h-full bg-background/90 backdrop-blur-xl border border-border rounded-2xl shadow-2xl overflow-hidden"
+                style={{
+                  backgroundColor: 'var(--bg-color)',
+                  borderColor: 'var(--sub-color)'
+                }}
+              >
+                <div className="p-4 border-b" style={{ borderColor: 'var(--sub-alt-color)' }}>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg">
+                          <MessageSquare className="h-4 w-4 text-foreground" />
+                        </div>
+                        <h2
+                          className="text-lg font-semibold"
+                          style={{ color: 'var(--text-color)' }}
+                        >
+                          chats
+                        </h2>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <GlowButton
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 hover:bg-accent hover:text-accent-foreground"
+                          style={
+                            {
+                              '--hover-bg': 'var(--sub-alt-color)',
+                              color: 'var(--text-color)'
+                            } as React.CSSProperties
+                          }
+                          onClick={onNewConversation}
+                          glowColor={`color-mix(in srgb, var(--main-color) 15%, transparent)`}
+                          glowIntensity={0.6}
+                        >
+                          <PlusCircle className="h-4 w-4" />
+                        </GlowButton>
+                        <GlowButton
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 hover:bg-accent"
+                          style={
+                            {
+                              '--hover-bg': 'var(--sub-alt-color)',
+                              color: 'var(--text-color)'
+                            } as React.CSSProperties
+                          }
+                          onClick={handleToggle}
+                          glowColor={`color-mix(in srgb, var(--main-color) 15%, transparent)`}
+                          glowIntensity={0.6}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </GlowButton>
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="search conversations..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 border text-foreground placeholder:text-muted-foreground"
+                        style={{
+                          backgroundColor: 'var(--bg-color)',
+                          borderColor: 'var(--sub-color)',
+                          color: 'var(--text-color)'
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <ScrollArea className="flex-1 max-h-full overflow-auto">
+                  <div className="p-2">
+                    <ConversationList
+                      conversations={filteredConversations}
+                      currentConversationId={currentConversationId}
+                      onSelectConversation={onSelectConversation}
+                      onDeleteConversation={onDeleteConversation}
+                      isCollapsed={false}
+                    />
+                  </div>
+                </ScrollArea>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {isCollapsed && (
+            <motion.div
+              key="collapsed"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-50"
+              initial={{ opacity: 0, scale: 0.8, x: -30 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.8, x: -30 }}
+              transition={{
+                type: 'spring',
+                stiffness: 400,
+                damping: 35,
+                mass: 1,
+                duration: 0.4
+              }}
+            >
+              <motion.div
+                className="bg-background/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl p-3"
+                style={{
+                  backgroundColor: 'var(--bg-color)',
+                  borderColor: 'var(--sub-color)'
+                }}
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <GlowButton
+                    variant="ghost"
+                    size="icon"
+                    className="h-10 w-10 transition-transform hover:scale-110"
+                    style={
+                      {
+                        color: 'var(--text-color)',
+                        '--hover-bg': 'var(--sub-alt-color)'
+                      } as React.CSSProperties
+                    }
+                    onClick={onNewConversation}
+                    glowColor={`color-mix(in srgb, var(--main-color) 20%, transparent)`}
+                    glowIntensity={0.8}
+                  >
+                    <PlusCircle className="h-5 w-5" />
+                  </GlowButton>
+                  <GlowButton
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 transition-transform hover:scale-110"
+                    style={
+                      {
+                        color: 'var(--text-color)',
+                        '--hover-bg': 'var(--sub-alt-color)'
+                      } as React.CSSProperties
+                    }
+                    onClick={handleToggle}
+                    glowColor={`color-mix(in srgb, var(--main-color) 20%, transparent)`}
+                    glowIntensity={0.8}
+                  >
+                    <ChevronLeft className="h-4 w-4 rotate-180" />
+                  </GlowButton>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
-      {isCollapsed && (
-        <motion.div
-          className="fixed left-0 top-1/2 -translate-y-1/2 z-20 hidden md:block"
-          initial={{ x: -40 }}
-          animate={{ x: 4 }}
-          exit={{ x: -40 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 20, delay: 0.3 }}
-        >
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 rounded-r-md rounded-l-none shadow-lg"
-            onClick={handleToggle}
-            aria-label="Expand Sidebar"
-          >
-            <MessageSquare className="h-5 w-5 rotate-0 transition-transform duration-200" />
-          </Button>
-        </motion.div>
-      )}
     </>
   );
 }
@@ -127,71 +250,100 @@ function ConversationList({
   currentConversationId,
   onSelectConversation,
   onDeleteConversation
-}: ConversationListProps) {
+}: ConversationListProps & { isCollapsed?: boolean }) {
+  const { hoverColor } = useThemeColors();
+
   return (
-    <ScrollArea className="flex-1 h-full">
-      <div className="p-2 space-y-1">
-        {conversations.length > 0 ? (
-          conversations.map((conversation) => (
-            <motion.div
-              key={conversation.id}
-              className="group relative"
-              whileHover={{ backgroundColor: 'hsla(var(--muted))' }}
-              style={{ borderRadius: '0.375rem' }}
-            >
-              <button
-                className={cn(
-                  'w-full flex items-center gap-2 px-2.5 py-2 text-left text-sm rounded-md transition-colors',
-                  conversation.id === currentConversationId
-                    ? 'bg-primary/15 text-primary dark:bg-primary/25 dark:text-white font-medium pointer-events-none'
-                    : 'text-sidebar-foreground/80 hover:text-sidebar-foreground group-hover:bg-transparent dark:group-hover:bg-transparent'
-                )}
-                onClick={() => onSelectConversation(conversation.id)}
-              >
-                <MessageSquare
-                  className={cn(
-                    'h-4 w-4 shrink-0',
-                    conversation.id === currentConversationId
-                      ? 'text-primary dark:text-white/90'
-                      : 'text-muted-foreground group-hover:text-sidebar-foreground'
-                  )}
-                />
-                <span className="truncate flex-1 min-w-0 break-words text-pretty">
-                  {conversation.title || 'New Chat'}
-                </span>
-              </button>
-              {conversation.id !== currentConversationId && onDeleteConversation && (
-                <motion.div
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                    onClick={(e: React.MouseEvent) => {
-                      e.stopPropagation();
-                      onDeleteConversation(conversation.id);
-                    }}
-                    aria-label="Delete conversation"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </motion.div>
+    <div className="space-y-1">
+      {conversations.length > 0 ? (
+        conversations.map((conversation) => (
+          <div
+            key={conversation.id}
+            className="group relative rounded-md"
+            style={{ backgroundColor: 'rgba(0,0,0,0)', borderRadius: '0.375rem' }}
+          >
+            <motion.button
+              className={cn(
+                'w-full flex items-center gap-3 px-3 py-3 text-left text-sm rounded-xl transition-all duration-200',
+                conversation.id === currentConversationId ? 'border' : ''
               )}
-            </motion.div>
-          ))
-        ) : (
-          <div className="text-center text-sm text-muted-foreground p-4 h-full flex items-center justify-center">
-            <p>
-              No conversations yet. <br /> Start a new chat!
-            </p>
+              style={{
+                color: 'var(--text-color)',
+                backgroundColor:
+                  conversation.id === currentConversationId ? 'var(--main-color)' : 'transparent',
+                borderColor:
+                  conversation.id === currentConversationId ? 'var(--main-color)' : 'transparent'
+              }}
+              onClick={() => onSelectConversation(conversation.id)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div
+                className={cn('p-2 rounded-lg')}
+                style={{
+                  backgroundColor:
+                    conversation.id === currentConversationId
+                      ? 'var(--sub-color)'
+                      : 'var(--sub-alt-color)'
+                }}
+              >
+                <MessageSquare className="h-4 w-4" />
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm leading-tight break-words line-clamp-2">
+                  {conversation.title || 'New Chat'}
+                </p>
+                <div
+                  className="flex items-center gap-1 text-xs mt-1"
+                  style={{ color: 'var(--sub-color)' }}
+                >
+                  <Clock className="h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">
+                    {new Date(conversation.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            </motion.button>
+
+            {conversation.id !== currentConversationId && onDeleteConversation && (
+              <div
+                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-transform duration-150 ease-in-out"
+              >
+                <GlowButton
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/20"
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                    e.stopPropagation();
+                    onDeleteConversation(conversation.id);
+                  }}
+                  glowColor="rgba(239, 68, 68, 0.3)"
+                  glowIntensity={0.5}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </GlowButton>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </ScrollArea>
+        ))
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center text-sm p-8"
+          style={{ color: 'var(--sub-color)' }}
+        >
+          <div className="flex flex-col items-center gap-3">
+            <div className="p-3 rounded-full" style={{ backgroundColor: 'var(--sub-alt-color)' }}>
+              <Sparkles className="h-6 w-6" />
+            </div>
+            <p>no conversations yet</p>
+            <p className="text-xs">start a new chat to begin!</p>
+          </div>
+        </motion.div>
+      )}
+    </div>
   );
 }
 
@@ -217,52 +369,49 @@ export function ConversationSidebarMobile({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button
+        <GlowButton
           variant="ghost"
           size="icon"
-          className="md:hidden fixed left-3 top-2.5 z-20 h-9 w-9 bg-background/80 backdrop-blur-sm border border-border"
+          className="md:hidden fixed left-4 top-8 z-20 h-10 w-10 bg-background/80 backdrop-blur-xl border border-border rounded-xl hover:bg-accent"
+          glowColor={`color-mix(in srgb, var(--main-color) 20%, transparent)`}
+          glowIntensity={0.7}
         >
-          <MessageSquare className="h-5 w-5" />
-        </Button>
+          <MessageSquare className="h-5 w-5 text-foreground" />
+        </GlowButton>
       </SheetTrigger>
       <SheetContent
         side="left"
-        className="p-0 w-64 sm:w-72 bg-sidebar text-sidebar-foreground flex flex-col"
+        className="p-0 w-80 bg-background/95 backdrop-blur-xl border-border"
       >
-        <div className="p-3 border-b border-sidebar-border flex items-center justify-between h-14 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 shrink-0" />
-            <h2 className="text-lg font-semibold">Chats</h2>
-          </div>
-          <div className="flex items-center gap-1">
-            <BorderTrail className="rounded-md">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={handleNewAndClose}
-                aria-label="New Chat"
-              >
-                <PlusCircle className="h-5 w-5" />
-              </Button>
-            </BorderTrail>
-            <Button
+        <div className="p-6 border-b border-border/30">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-accent/20 rounded-lg">
+                <MessageSquare className="h-4 w-4 text-accent-foreground" />
+              </div>
+              <h2 className="text-lg font-semibold text-foreground">chats</h2>
+            </div>
+            <GlowButton
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
-              onClick={() => setIsOpen(false)}
-              aria-label="Close Sidebar"
+              className="h-8 w-8 hover:bg-accent hover:text-accent-foreground"
+              onClick={handleNewAndClose}
+              glowColor={`color-mix(in srgb, var(--main-color) 15%, transparent)`}
+              glowIntensity={0.6}
             >
-              <X className="h-5 w-5" />
-            </Button>
+              <PlusCircle className="h-4 w-4" />
+            </GlowButton>
           </div>
         </div>
-        <ConversationList
-          conversations={conversations}
-          currentConversationId={currentConversationId}
-          onSelectConversation={handleSelectAndClose}
-          onDeleteConversation={onDeleteConversation}
-        />
+
+        <ScrollArea className="flex-1 p-4">
+          <ConversationList
+            conversations={conversations}
+            currentConversationId={currentConversationId}
+            onSelectConversation={handleSelectAndClose}
+            onDeleteConversation={onDeleteConversation}
+          />
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );

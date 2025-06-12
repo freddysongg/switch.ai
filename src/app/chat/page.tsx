@@ -1,12 +1,12 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+'use client';
+
+import { AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { AI_CONFIG } from '@/config/ai.config.js';
 import { useAuth } from '@/contexts/auth-context';
 import { chatApi } from '@/lib/api.js';
 
-import { ChatMessage as ChatMessageType, Conversation } from '@/types/chat.js';
+import type { ChatMessage as ChatMessageType, Conversation } from '@/types/chat.js';
 
 import { ScrollArea } from '@/components/ui/scroll-area.js';
 import { useToast } from '@/components/ui/use-toast.js';
@@ -17,24 +17,32 @@ import { ConversationSidebar } from '@/components/chat/ConversationSidebar.js';
 import { WelcomePage } from '@/components/chat/WelcomePage.js';
 
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
+const RETRY_DELAY = 1000;
 
-export function ChatInterface() {
+export default function ChatInterface() {
+  const { authToken, currentUser } = useAuth();
+  const { toast } = useToast();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingSteps, setLoadingSteps] = useState<string[]>([]);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
-  const { authToken, currentUser } = useAuth();
 
   const retryApiCall = useCallback(
     async <T,>(apiCall: () => Promise<T>, retries = MAX_RETRIES): Promise<T> => {
       try {
         return await apiCall();
       } catch (error) {
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response?: { status?: number } };
+          if (axiosError.response?.status === 429) {
+            console.warn('Rate limit exceeded, not retrying immediately');
+            throw error;
+          }
+        }
+
         if (retries > 0) {
           await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
           return retryApiCall(apiCall, retries - 1);
@@ -45,63 +53,93 @@ export function ChatInterface() {
     []
   );
 
-  // Load conversations from API
   useEffect(() => {
+    let isMounted = true;
+
     const loadConversations = async () => {
       if (!authToken || !currentUser) {
         console.log('No auth token or user, skipping conversation load.');
-        setConversations([]);
+        if (isMounted) {
+          setConversations([]);
+        }
         return;
       }
 
       try {
-        setError(null);
-        const apiConversations = await retryApiCall(() => chatApi.listConversations());
-        setConversations(apiConversations);
+        if (isMounted) {
+          setConversations(await retryApiCall(() => chatApi.listConversations()));
+        }
       } catch (error) {
         console.error('Error loading conversations:', error);
-        const errorMessage =
-          error instanceof Error ? error.message : 'Failed to load conversations';
-        setError(errorMessage);
-        toast({
-          title: 'error',
-          description: 'failed to load conversations.',
-          variant: 'destructive'
-        });
+        if (
+          !(
+            error &&
+            typeof error === 'object' &&
+            'response' in error &&
+            (error as { response?: { status?: number } }).response?.status === 429
+          )
+        ) {
+          toast({
+            title: 'error',
+            description: 'failed to load conversations.',
+            variant: 'destructive'
+          });
+        }
         setConversations([]);
       }
     };
 
     loadConversations();
-  }, [toast, retryApiCall, authToken, currentUser]);
 
-  // Load conversation messages
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authToken, currentUser, toast]);
+
   useEffect(() => {
+    let isMounted = true;
+
     const loadMessages = async () => {
       if (!currentConversationId) {
-        setMessages([]);
+        if (isMounted) {
+          setMessages([]);
+        }
         return;
       }
 
-      setError(null);
       try {
         const messages = await retryApiCall(() => chatApi.getConversation(currentConversationId));
-        setMessages(messages);
+        if (isMounted) {
+          setMessages(messages);
+        }
       } catch (error) {
         console.error('Error loading messages:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Failed to load messages';
-        setError(errorMessage);
-        toast({
-          title: 'error',
-          description: 'failed to load conversation messages.',
-          variant: 'destructive'
-        });
+        if (
+          !(
+            error &&
+            typeof error === 'object' &&
+            'response' in error &&
+            (error as { response?: { status?: number } }).response?.status === 429
+          )
+        ) {
+          toast({
+            title: 'error',
+            description: 'failed to load conversation messages.',
+            variant: 'destructive'
+          });
+        }
         setMessages([]);
       }
     };
 
     loadMessages();
-  }, [currentConversationId, toast, retryApiCall]);
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentConversationId, toast]);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (messagesEndRef.current) {
@@ -120,7 +158,6 @@ export function ChatInterface() {
   const handleSelectConversation = (id: string) => {
     setCurrentConversationId(id);
     setHasInteracted(true);
-    setError(null);
     setMessages([]);
   };
 
@@ -128,21 +165,19 @@ export function ChatInterface() {
     setCurrentConversationId(null);
     setMessages([]);
     setHasInteracted(false);
-    setError(null);
   };
 
   const handleSendMessage = async (content: string) => {
-    if (!content.trim()) {
+    if (content.trim().length < 3) {
       toast({
-        title: 'error',
-        description: 'cannot send an empty message',
+        title: 'Message too short',
+        description: 'Your message must be at least 3 characters long.',
         variant: 'destructive'
       });
       return;
     }
 
     setHasInteracted(true);
-    setError(null);
 
     const newUserMessage: ChatMessageType = {
       id: `user-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`,
@@ -153,9 +188,13 @@ export function ChatInterface() {
       metadata: {}
     };
     setMessages((prev) => [...prev, newUserMessage]);
+    setLoadingSteps(['Analyzing intent...']);
 
     setIsLoading(true);
     try {
+      setTimeout(() => setLoadingSteps((prev) => [...prev, 'Searching database...']), 1500);
+      setTimeout(() => setLoadingSteps((prev) => [...prev, 'Formatting response...']), 3000);
+
       const response = await retryApiCall(() =>
         chatApi.sendMessage({
           message: content,
@@ -163,19 +202,26 @@ export function ChatInterface() {
         })
       );
 
-      if (!currentConversationId && response.metadata && response.metadata.conversationId) {
-        setCurrentConversationId(response.metadata.conversationId);
-        if (authToken) {
-          retryApiCall(() => chatApi.listConversations())
-            .then(setConversations)
-            .catch((err) => console.error('Failed to refresh convos', err));
-        }
+      console.log('Full API Response:', response);
+
+      if (!currentConversationId && response.conversationId) {
+        const conversationId = response.conversationId;
+        setCurrentConversationId(conversationId);
+        const title = content.substring(0, 30) + (content.length > 30 ? '...' : '');
+        await retryApiCall(() => chatApi.updateConversation(conversationId, { title }));
+        retryApiCall(() => chatApi.listConversations())
+          .then(setConversations)
+          .catch((err) => console.error('Failed to refresh convos', err));
       }
+
       const assistantMessage: ChatMessageType = {
-        ...response,
-        id: response.id || `asst-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`,
+        id: `asst-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`,
+        role: 'assistant',
+        content: response.analysis || response.overview,
+        analysis: response,
         timestamp: new Date().toISOString(),
-        createdAt: new Date()
+        createdAt: new Date(),
+        metadata: {}
       };
 
       setMessages((prev) => [
@@ -186,133 +232,98 @@ export function ChatInterface() {
     } catch (error: unknown) {
       console.error('Error sending message:', error);
       let errorMessage = 'Failed to send message';
+      let errorDetails: unknown = error;
 
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { error?: string } }; message?: string };
-        errorMessage = axiosError.response?.data?.error || axiosError.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
-      setError(errorMessage);
-      toast({
-        title: 'error',
-        description: 'failed to send message. please try again.',
-        variant: 'destructive'
-      });
-
-      const errorResponseMessage: ChatMessageType = {
-        id: `error-${Date.now()}`,
-        role: 'assistant',
-        content: AI_CONFIG?.FALLBACK_ERROR_MESSAGE_LLM || 'Apologies, an error occurred.',
-        timestamp: new Date().toISOString(),
-        createdAt: new Date(),
-        metadata: { error: true }
-      };
-      setMessages((prev) => [...prev, errorResponseMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDeleteConversation = async (id: string) => {
-    try {
-      await retryApiCall(() => chatApi.deleteConversation(id));
-      setConversations((prev) => prev.filter((conv) => conv.id !== id));
-      if (id === currentConversationId) {
-        const remainingConversations = conversations.filter((conv) => conv.id !== id);
-        if (remainingConversations.length > 0) {
-          setCurrentConversationId(remainingConversations[0].id);
-        } else {
-          handleResetState();
+        const axiosError = error as {
+          response?: {
+            data?: { error?: string | { message: string; details?: Record<string, unknown> } };
+          };
+          message?: string;
+        };
+        const errorData = axiosError.response?.data?.error;
+        if (typeof errorData === 'object' && errorData !== null && 'message' in errorData) {
+          errorMessage = errorData.message;
+          errorDetails = errorData.details || errorData;
+        } else if (typeof errorData === 'string') {
+          errorMessage = errorData;
+        } else if (axiosError.message) {
+          errorMessage = axiosError.message;
         }
       }
-      toast({
-        title: 'success',
-        description: 'conversation deleted successfully.'
-      });
-    } catch (error) {
-      console.error('Error deleting conversation:', error);
-      const errorMessage = error instanceof Error ? error.message : 'failed to delete conversation';
-      setError(errorMessage);
-      toast({
-        title: 'error',
-        description: 'failed to delete conversation. please try again.',
-        variant: 'destructive'
-      });
-    }
-  };
 
-  const handleResetState = () => {
-    setCurrentConversationId(null);
-    setMessages([]);
-    setHasInteracted(false);
-    setError(null);
+      const errorResponse: ChatMessageType = {
+        id: `err-${Date.now()}`,
+        role: 'assistant',
+        content: errorMessage,
+        timestamp: new Date().toISOString(),
+        createdAt: new Date(),
+        metadata: {
+          error: true,
+          details: errorDetails
+        }
+      };
+
+      setMessages((prev) => [...prev, errorResponse]);
+    } finally {
+      setIsLoading(false);
+      setLoadingSteps([]);
+    }
   };
 
   return (
-    <div className="flex h-screen bg-background dark:bg-background/95 text-foreground">
+    <div className="flex h-screen w-screen overflow-hidden bg-background">
       <ConversationSidebar
         conversations={conversations}
-        currentConversationId={currentConversationId}
         onSelectConversation={handleSelectConversation}
         onNewConversation={handleNewConversation}
-        onDeleteConversation={handleDeleteConversation}
+        currentConversationId={currentConversationId}
       />
       <main className="flex flex-1 flex-col overflow-hidden">
-        <ChatHeader onReset={handleNewConversation} />
-        <div className="relative flex flex-1 flex-col overflow-hidden bg-muted/30 dark:bg-muted/10">
-          {!hasInteracted && !currentConversationId ? (
-            <AnimatePresence>
-              <motion.div
-                key="welcome"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
-                className="h-full flex flex-col"
-              >
-                <WelcomePage onSendMessage={handleSendMessage} isLoading={isLoading} />
-              </motion.div>
-            </AnimatePresence>
-          ) : (
-            <ScrollArea className="flex-1 px-2 sm:px-4 pt-2 sm:pt-4">
-              <div className="container max-w-4xl mx-auto space-y-1 pb-2">
-                {error && (
-                  <motion.div
-                    className="bg-destructive/20 text-destructive px-4 py-2.5 rounded-lg mb-3 text-sm"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                  >
-                    {error}
-                  </motion.div>
-                )}
-                <AnimatePresence initial={false}>
-                  {messages.map((message, index) => (
+        <ChatHeader
+          onReset={handleNewConversation}
+          conversationCount={conversations.length}
+          isAiThinking={isLoading}
+        />
+        <div className="relative flex flex-1 flex-col overflow-hidden bg-background text-foreground">
+          {messages.length > 0 || hasInteracted ? (
+            <>
+              <ScrollArea className="flex-1 p-4" id="chat-scroll-area">
+                <AnimatePresence>
+                  {messages.map((msg, index) => (
                     <ChatMessage
-                      key={message.id}
-                      message={message}
+                      key={msg.id}
+                      message={msg}
+                      currentUser={currentUser}
                       isLastMessage={index === messages.length - 1}
-                      currentUser={currentUser || undefined}
                     />
                   ))}
+                  {isLoading && loadingSteps.length > 0 && (
+                    <ChatMessage
+                      key="loading"
+                      message={{
+                        id: 'loading',
+                        role: 'assistant',
+                        content: '',
+                        timestamp: new Date().toISOString(),
+                        createdAt: new Date(),
+                        metadata: { loadingSteps }
+                      }}
+                      currentUser={currentUser}
+                      isLastMessage={true}
+                    />
+                  )}
+                  <div ref={messagesEndRef} className="h-1" />
                 </AnimatePresence>
-                {isLoading && messages.length > 0 && messages.slice(-1)[0]?.role === 'user' && (
-                  <motion.div
-                    className="flex items-center gap-2 py-4 pl-10 text-muted-foreground"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                  >
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="text-xs">assistant is typing...</span>
-                  </motion.div>
-                )}
-                <div ref={messagesEndRef} className="h-1" />
+              </ScrollArea>
+              <div className="border-t bg-background p-4">
+                <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
               </div>
-            </ScrollArea>
-          )}
-          {(hasInteracted || currentConversationId) && (
-            <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+            </>
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center">
+              <WelcomePage onSendMessage={handleSendMessage} isLoading={isLoading} />
+            </div>
           )}
         </div>
       </main>

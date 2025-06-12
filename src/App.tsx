@@ -1,16 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { AuthProvider } from '@/contexts/AuthContext';
-import { loadSavedTheme } from '@/lib/ThemeService';
-
-import AboutPage from '@/app/about/page';
-import { ChatInterface } from '@/app/chat/page';
-import { LoginPage } from '@/app/login/page';
-import LandingPage from '@/app/marketing/page';
-import { RegisterPage } from '@/app/register/page';
+import { availableAppThemes, loadSavedTheme } from '@/lib/ThemeService';
 
 import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';
@@ -20,13 +14,38 @@ import './App.css';
 
 import { useAuth } from '@/contexts/auth-context';
 
+const AboutPage = lazy(() => import('@/app/about/page'));
+const ChatInterface = lazy(() => import('@/app/chat/page'));
+const LoginPage = lazy(() =>
+  import('@/app/login/page').then((module) => ({ default: module.LoginPage }))
+);
+const LandingPage = lazy(() => import('@/app/marketing/page'));
+const RegisterPage = lazy(() =>
+  import('@/app/register/page').then((module) => ({ default: module.RegisterPage }))
+);
+
 function AppContent() {
   const { currentUser, isLoading } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   useEffect(() => {
     loadSavedTheme();
+
+    availableAppThemes.forEach((theme) => {
+      if (theme.path) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.href = theme.path;
+        link.as = 'style';
+        document.head.appendChild(link);
+      }
+    });
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth';
@@ -90,33 +109,44 @@ function AppContent() {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/about" element={<AboutPage />} />
-      <Route
-        path="/chat"
-        element={currentUser ? <ChatInterface /> : <Navigate to="/login" replace />}
-      />
-      <Route
-        path="/login"
-        element={!currentUser ? <LoginPage /> : <Navigate to="/chat" replace />}
-      />
-      <Route
-        path="/register"
-        element={
-          !currentUser ? (
-            <RegisterPage
-              onSwitchToLogin={() => {
-                navigate('/login');
-              }}
-            />
-          ) : (
-            <Navigate to="/chat" replace />
-          )
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen bg-background">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route
+          path="/chat"
+          element={currentUser ? <ChatInterface /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/login"
+          element={!currentUser ? <LoginPage /> : <Navigate to="/chat" replace />}
+        />
+        <Route
+          path="/register"
+          element={
+            !currentUser ? (
+              <RegisterPage
+                onSwitchToLogin={() => {
+                  navigate('/login');
+                }}
+              />
+            ) : (
+              <Navigate to="/chat" replace />
+            )
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
 
