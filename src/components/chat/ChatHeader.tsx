@@ -74,20 +74,27 @@ export function ChatHeader({
             transition={{ duration: 0.3 }}
           />
 
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {isAiThinking && (
               <motion.div
                 className="absolute top-0 left-0 right-0 h-1"
                 style={{
-                  background: `linear-gradient(to right, var(--main-color), var(--main-color))`
+                  background: `linear-gradient(90deg, var(--main-color) 0%, var(--main-color) 50%, var(--main-color) 100%)`
                 }}
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                exit={{ scaleX: 0 }}
+                initial={{ scaleX: 0, originX: 0 }}
+                animate={{
+                  scaleX: [0, 1, 0],
+                  originX: [0, 0, 1]
+                }}
+                exit={{
+                  scaleX: 0,
+                  originX: 1,
+                  transition: { duration: 0.2 }
+                }}
                 transition={{
-                  duration: 1,
+                  duration: 2,
                   repeat: Number.POSITIVE_INFINITY,
-                  repeatType: 'reverse'
+                  ease: 'easeInOut'
                 }}
               />
             )}

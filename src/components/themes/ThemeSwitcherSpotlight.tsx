@@ -23,8 +23,7 @@ const getThemePreviewColors = (themeId: string): Required<AppTheme['previewColor
     return specificPreview as Required<AppTheme['previewColors']>;
   }
   const fallbackColors = { background: '#888888', text: '#ffffff', primary: '#007bff' };
-  const defaultThemeColors = availableAppThemes.find((t) => t.id === themeId)?.previewColors;
-  return defaultThemeColors || fallbackColors;
+  return fallbackColors;
 };
 
 export function ThemeSwitcherSpotlight() {
@@ -33,12 +32,10 @@ export function ThemeSwitcherSpotlight() {
 
   React.useEffect(() => {
     const initializeTheme = () => {
-      const savedThemeId = localStorage.getItem('switch-ai-active-theme-id');
+      const savedThemeId = localStorage.getItem('switch-ai-theme');
       let initialThemeId = savedThemeId;
       if (!initialThemeId || !availableAppThemes.some((t) => t.id === initialThemeId)) {
-        initialThemeId = window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light';
+        initialThemeId = 'dark';
       }
       applyTheme(initialThemeId);
       setActiveThemeId(initialThemeId);
@@ -145,10 +142,10 @@ export function ThemeSwitcherSpotlight() {
                       onSelect={() => handleThemeSelect(theme.id)}
                       className={cn(
                         'cursor-pointer px-4 py-3 mx-2 my-1 rounded-lg font-mono transition-all duration-200',
-                        'hover:bg-accent/50 hover:text-accent-foreground',
-                        'flex items-center justify-between group',
-                        activeThemeId === theme.id &&
-                          'bg-accent text-accent-foreground ring-2 ring-primary/20'
+                        'bg-transparent hover:bg-black/5 hover:dark:bg-white/5',
+                        'flex items-center justify-between group border border-transparent',
+                        '[&[aria-selected="true"]]:bg-transparent [&[data-selected="true"]]:bg-transparent',
+                        activeThemeId === theme.id && 'border-primary/40'
                       )}
                     >
                       <div className="flex items-center gap-3">

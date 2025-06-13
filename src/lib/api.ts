@@ -150,7 +150,9 @@ export const chatApi = {
 
   getConversation: async (conversationId: string): Promise<ChatMessage[]> => {
     return makeRequest(`getConversation-${conversationId}`, async () => {
-      const { data } = await apiClient.get<ChatMessage[]>(`/chat/${conversationId}`);
+      const { data } = await apiClient.get<ChatMessage[]>(`/messages`, {
+        params: { conversationId }
+      });
       return data;
     });
   },

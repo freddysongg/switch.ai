@@ -2,10 +2,53 @@ import { AnalysisResponse } from './api';
 
 export type UserRole = 'user' | 'assistant';
 
+export interface StructuredContent {
+  overview?: string;
+  analysis?: string;
+  conclusion?:
+    | string
+    | {
+        primaryDifferences?: string;
+        overallAssessment?: string;
+        decisionGuidance?: string;
+      };
+  comparativeAnalysis?: {
+    feelingTactility?:
+      | string
+      | {
+          description?: string;
+          keyDifferences?: string;
+          userImpact?: string;
+        };
+    soundProfile?:
+      | string
+      | {
+          description?: string;
+          acousticDifferences?: string;
+          environmentalConsiderations?: string;
+        };
+    buildMaterialComposition?:
+      | string
+      | {
+          materialComparison?: string;
+          durabilityAssessment?: string;
+          modificationPotential?: string;
+        };
+    performanceAspects?:
+      | string
+      | {
+          gamingPerformance?: string;
+          typingPerformance?: string;
+          consistencyReliability?: string;
+          fatigueFactors?: string;
+        };
+  };
+}
+
 export interface ChatMessage {
   id: string;
   role: UserRole;
-  content: string;
+  content: string | StructuredContent;
   timestamp: string;
   metadata: Record<string, unknown>;
   analysis?: AnalysisResponse;

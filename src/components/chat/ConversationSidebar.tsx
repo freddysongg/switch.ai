@@ -8,7 +8,7 @@ import {
   Sparkles,
   Trash2
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { useIsMobile } from '@/hooks/use-mobile.js';
 import { cn } from '@/lib/utils.js';
@@ -19,29 +19,6 @@ import { GlowButton } from '@/components/ui/glow-button.js';
 import { Input } from '@/components/ui/input.js';
 import { ScrollArea } from '@/components/ui/scroll-area.js';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet.js';
-
-function useThemeColors() {
-  const [hoverColor, setHoverColor] = useState('rgba(0, 0, 0, 0.05)');
-
-  useEffect(() => {
-    const updateColors = () => {
-      const isDark = document.documentElement.classList.contains('dark');
-      setHoverColor(isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)');
-    };
-
-    updateColors();
-
-    const observer = new MutationObserver(updateColors);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  return { hoverColor };
-}
 
 export function ConversationSidebarDesktop({
   conversations,
@@ -70,7 +47,7 @@ export function ConversationSidebarDesktop({
         layout
         style={{ willChange: 'width' }}
         animate={{ width: isCollapsed ? 80 : 320 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 1,duration: 0.6 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 1, duration: 0.6 }}
       >
         <AnimatePresence mode="wait">
           {!isCollapsed && (
@@ -251,8 +228,6 @@ function ConversationList({
   onSelectConversation,
   onDeleteConversation
 }: ConversationListProps & { isCollapsed?: boolean }) {
-  const { hoverColor } = useThemeColors();
-
   return (
     <div className="space-y-1">
       {conversations.length > 0 ? (
@@ -265,12 +240,12 @@ function ConversationList({
             <motion.button
               className={cn(
                 'w-full flex items-center gap-3 px-3 py-3 text-left text-sm rounded-xl transition-all duration-200',
-                conversation.id === currentConversationId ? 'border' : ''
+                conversation.id === currentConversationId
+                  ? 'bg-transparent hover:bg-black/5 hover:dark:bg-white/5 border border-current'
+                  : 'bg-transparent hover:bg-black/5 hover:dark:bg-white/5'
               )}
               style={{
                 color: 'var(--text-color)',
-                backgroundColor:
-                  conversation.id === currentConversationId ? 'var(--main-color)' : 'transparent',
                 borderColor:
                   conversation.id === currentConversationId ? 'var(--main-color)' : 'transparent'
               }}
@@ -283,11 +258,19 @@ function ConversationList({
                 style={{
                   backgroundColor:
                     conversation.id === currentConversationId
-                      ? 'var(--sub-color)'
+                      ? 'var(--main-color)'
                       : 'var(--sub-alt-color)'
                 }}
               >
-                <MessageSquare className="h-4 w-4" />
+                <MessageSquare
+                  className="h-4 w-4"
+                  style={{
+                    color:
+                      conversation.id === currentConversationId
+                        ? 'var(--bg-color)'
+                        : 'var(--text-color)'
+                  }}
+                />
               </div>
 
               <div className="flex-1 min-w-0">
@@ -307,9 +290,7 @@ function ConversationList({
             </motion.button>
 
             {conversation.id !== currentConversationId && onDeleteConversation && (
-              <div
-                className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-transform duration-150 ease-in-out"
-              >
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-transform duration-150 ease-in-out">
                 <GlowButton
                   variant="ghost"
                   size="icon"

@@ -4,7 +4,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { AuthProvider } from '@/contexts/AuthContext';
-import { availableAppThemes, loadSavedTheme } from '@/lib/ThemeService';
+import { loadSavedTheme } from '@/lib/ThemeService';
 
 import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';
@@ -31,16 +31,6 @@ function AppContent() {
 
   useEffect(() => {
     loadSavedTheme();
-
-    availableAppThemes.forEach((theme) => {
-      if (theme.path) {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.href = theme.path;
-        link.as = 'style';
-        document.head.appendChild(link);
-      }
-    });
   }, []);
 
   useEffect(() => {
@@ -153,7 +143,7 @@ function AppContent() {
 function App() {
   return (
     <>
-      <ThemeProvider defaultTheme="light" storageKey="switch-ai-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="switch-ai-theme">
         <AuthProvider>
           <div className="h-full w-full font-mono smooth-scroll">
             <AppContent />

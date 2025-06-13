@@ -18,8 +18,8 @@ export function generateThemeName(id: string): string {
 }
 
 export const availableAppThemes: AppTheme[] = [
-  { name: 'Default Light', id: 'light', path: '', baseMode: 'light' },
-  { name: 'Default Dark', id: 'dark', path: '', baseMode: 'dark' },
+  { name: 'Default Light', id: 'light', path: '/themes/light.css', baseMode: 'light' },
+  { name: 'Default Dark', id: 'dark', path: '/themes/dark.css', baseMode: 'dark' },
   {
     name: '80s After Dark',
     id: '80s_after_dark',
@@ -305,8 +305,8 @@ export const availableAppThemes: AppTheme[] = [
 ];
 
 export const themeColorPreviews: Record<string, AppTheme['previewColors']> = {
-  light: { background: '#FFFFFF', text: '#09090B', primary: '#09090B' },
-  dark: { background: '#181a1f', text: '#f7fafc', primary: '#344589' },
+  light: { background: '#ffffff', text: '#0a0a0a', primary: '#007acc' },
+  dark: { background: '#0a0a0a', text: '#ffffff', primary: '#ffffff' },
   '80s_after_dark': { background: '#1b1d36', text: '#e1e7ec', primary: '#fca6d1' },
   '8008': { background: '#333a45', text: '#e9ecf0', primary: '#f44c7f' },
   '9009': { background: '#eeebe2', text: '#080909', primary: '#7fa480' },
@@ -487,19 +487,13 @@ export const themeColorPreviews: Record<string, AppTheme['previewColors']> = {
   vscode: { background: '#1e1e1e', text: '#d4d4d4', primary: '#007acc' },
   watermelon: { background: '#1f4437', text: '#cdc6bc', primary: '#d6686f' },
   wavez: { background: '#1c292f', text: '#e9efe6', primary: '#6bde3b' },
-  witch_girl: { background: '#f3dbda', text: '#56786a', primary: '#56786a' },
-  default: {
-    background: 'var(--bg-color)',
-    text: 'var(--text-color)',
-    primary: 'var(--main-color)'
-  }
+  witch_girl: { background: '#f3dbda', text: '#56786a', primary: '#56786a' }
 };
 
 let activeThemeStyleElement: HTMLStyleElement | null = null;
 
 function themeCss(theme: AppTheme) {
-  const isDefault = theme.id === 'light' || theme.id === 'dark';
-  return isDefault ? '' : `@import url('${theme.path}');`;
+  return theme.path ? `@import url('${theme.path}');` : '';
 }
 
 export function applyTheme(themeId: string): void {
@@ -521,7 +515,7 @@ export function applyTheme(themeId: string): void {
   activeThemeStyleElement = newThemeStyleElement;
 
   document.documentElement.classList.remove('light', 'dark');
-  document.documentElement.classList.add(theme.baseMode ?? 'light');
+  document.documentElement.classList.add(theme.baseMode ?? 'dark');
   document.documentElement.setAttribute('data-theme', theme.id);
   localStorage.setItem('switch-ai-theme', theme.id);
 
@@ -535,7 +529,6 @@ export function loadSavedTheme(): void {
   if (savedThemeId) {
     applyTheme(savedThemeId);
   } else {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    applyTheme(prefersDark ? 'dark' : 'light');
+    applyTheme('dark');
   }
 }

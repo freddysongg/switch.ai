@@ -28,6 +28,7 @@ export default function ChatInterface() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingSteps, setLoadingSteps] = useState<string[]>([]);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [skipNextLoad, setSkipNextLoad] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const retryApiCall = useCallback(
@@ -108,10 +109,22 @@ export default function ChatInterface() {
         return;
       }
 
+      if (skipNextLoad) {
+        setSkipNextLoad(false);
+        return;
+      }
+
       try {
-        const messages = await retryApiCall(() => chatApi.getConversation(currentConversationId));
+        const fetchedMessages = await retryApiCall(() =>
+          chatApi.getConversation(currentConversationId)
+        );
         if (isMounted) {
-          setMessages(messages);
+          const chronologicalMessages = fetchedMessages.sort((a, b) => {
+            const timeA = new Date(a.timestamp || a.createdAt).getTime();
+            const timeB = new Date(b.timestamp || b.createdAt).getTime();
+            return timeA - timeB;
+          });
+          setMessages(chronologicalMessages);
         }
       } catch (error) {
         console.error('Error loading messages:', error);
@@ -139,7 +152,7 @@ export default function ChatInterface() {
       isMounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentConversationId, toast]);
+  }, [currentConversationId, skipNextLoad, toast]);
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (messagesEndRef.current) {
@@ -149,11 +162,16 @@ export default function ChatInterface() {
 
   useEffect(() => {
     if (messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      const behavior = lastMessage?.role === 'user' || isLoading ? 'smooth' : 'auto';
-      setTimeout(() => scrollToBottom(behavior), 50);
+      const behavior = isLoading ? 'smooth' : 'auto';
+      setTimeout(() => scrollToBottom(behavior), 100);
     }
   }, [messages, isLoading, scrollToBottom]);
+
+  useEffect(() => {
+    if (!isLoading && messages.length > 0) {
+      setTimeout(() => scrollToBottom('smooth'), 200);
+    }
+  }, [isLoading, messages.length, scrollToBottom]);
 
   const handleSelectConversation = (id: string) => {
     setCurrentConversationId(id);
@@ -165,6 +183,32 @@ export default function ChatInterface() {
     setCurrentConversationId(null);
     setMessages([]);
     setHasInteracted(false);
+  };
+
+  const handleDeleteConversation = async (conversationId: string) => {
+    try {
+      await retryApiCall(() => chatApi.deleteConversation(conversationId));
+
+      setConversations((prev) => prev.filter((conv) => conv.id !== conversationId));
+
+      if (conversationId === currentConversationId) {
+        setCurrentConversationId(null);
+        setMessages([]);
+        setHasInteracted(false);
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Conversation deleted successfully.'
+      });
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete conversation.',
+        variant: 'destructive'
+      });
+    }
   };
 
   const handleSendMessage = async (content: string) => {
@@ -187,10 +231,12 @@ export default function ChatInterface() {
       createdAt: new Date(),
       metadata: {}
     };
-    setMessages((prev) => [...prev, newUserMessage]);
-    setLoadingSteps(['Analyzing intent...']);
 
+    setMessages((prev) => [...prev, newUserMessage]);
+
+    setLoadingSteps(['Analyzing intent...']);
     setIsLoading(true);
+
     try {
       setTimeout(() => setLoadingSteps((prev) => [...prev, 'Searching database...']), 1500);
       setTimeout(() => setLoadingSteps((prev) => [...prev, 'Formatting response...']), 3000);
@@ -202,10 +248,9 @@ export default function ChatInterface() {
         })
       );
 
-      console.log('Full API Response:', response);
-
       if (!currentConversationId && response.conversationId) {
         const conversationId = response.conversationId;
+        setSkipNextLoad(true);
         setCurrentConversationId(conversationId);
         const title = content.substring(0, 30) + (content.length > 30 ? '...' : '');
         await retryApiCall(() => chatApi.updateConversation(conversationId, { title }));
@@ -217,18 +262,22 @@ export default function ChatInterface() {
       const assistantMessage: ChatMessageType = {
         id: `asst-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`,
         role: 'assistant',
-        content: response.analysis || response.overview,
+        content: {
+          overview: response.overview,
+          analysis: response.analysis,
+          conclusion: response.conclusion,
+          comparativeAnalysis: response.comparativeAnalysis
+        },
         analysis: response,
         timestamp: new Date().toISOString(),
         createdAt: new Date(),
         metadata: {}
       };
 
-      setMessages((prev) => [
-        ...prev.filter((m) => m.id !== newUserMessage.id),
-        newUserMessage,
-        assistantMessage
-      ]);
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      setIsLoading(false);
+      setLoadingSteps([]);
     } catch (error: unknown) {
       console.error('Error sending message:', error);
       let errorMessage = 'Failed to send message';
@@ -265,7 +314,7 @@ export default function ChatInterface() {
       };
 
       setMessages((prev) => [...prev, errorResponse]);
-    } finally {
+
       setIsLoading(false);
       setLoadingSteps([]);
     }
@@ -277,6 +326,7 @@ export default function ChatInterface() {
         conversations={conversations}
         onSelectConversation={handleSelectConversation}
         onNewConversation={handleNewConversation}
+        onDeleteConversation={handleDeleteConversation}
         currentConversationId={currentConversationId}
       />
       <main className="flex flex-1 flex-col overflow-hidden">
@@ -296,6 +346,7 @@ export default function ChatInterface() {
                       message={msg}
                       currentUser={currentUser}
                       isLastMessage={index === messages.length - 1}
+                      onContentLoaded={() => scrollToBottom('smooth')}
                     />
                   ))}
                   {isLoading && loadingSteps.length > 0 && (

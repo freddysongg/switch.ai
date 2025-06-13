@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils.js';
 
 import type { ComparisonSwitchData } from '@/types/api';
-import type { ChatMessage as ChatMessageType, User } from '@/types/chat';
+import type { ChatMessage as ChatMessageType, StructuredContent, User } from '@/types/chat';
 
 import { Badge } from '@/components/ui/badge.js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,68 +17,153 @@ export interface ChatMessageProps {
   message: ChatMessageType;
   isLastMessage: boolean;
   currentUser?: User | null;
+  onContentLoaded?: () => void;
 }
 
 const sanitizeHtml = (content: string): string => {
   return DOMPurify.sanitize(content, {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'code', 'pre', 'br', 'p', 'ul', 'ol', 'li'],
+    ALLOWED_TAGS: [
+      'b',
+      'i',
+      'em',
+      'strong',
+      'code',
+      'pre',
+      'br',
+      'p',
+      'ul',
+      'ol',
+      'li',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+      'table',
+      'thead',
+      'tbody',
+      'tr',
+      'th',
+      'td'
+    ],
     ALLOWED_ATTR: []
   });
 };
 
-export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  isLastMessage,
+  currentUser,
+  onContentLoaded
+}: ChatMessageProps) {
   const isUserMessage = message.role === 'user';
   const [displayContent, setDisplayContent] = useState('');
-  const [isTyping, setIsTyping] = useState(
-    !isUserMessage && message.content && message.content.length > 0
-  );
+  const [isTyping, setIsTyping] = useState(false);
   const isLoading = message.id === 'loading' && message.metadata?.loadingSteps;
 
-  useEffect(() => {
-    if (isUserMessage || !message.content || isLoading) {
-      setDisplayContent(message.content);
-      setIsTyping(false);
-      return;
+  const getFullMessageContent = (): string => {
+    if (isUserMessage || isLoading) {
+      return typeof message.content === 'string' ? message.content : '';
     }
 
-    const sanitizedContent = sanitizeHtml(message.content);
+    if (typeof message.content === 'object' && message.content !== null) {
+      const structuredContent = message.content as StructuredContent;
+      const parts: string[] = [];
 
-    setIsTyping(true);
-    let currentIndex = 0;
-    const typingSpeed = 10;
-    const segmentLength = Math.max(1, Math.floor(sanitizedContent.length / (300 / typingSpeed)));
-
-    const interval = setInterval(() => {
-      if (currentIndex <= sanitizedContent.length) {
-        setDisplayContent(sanitizedContent.slice(0, currentIndex));
-        currentIndex += segmentLength;
-      } else {
-        setDisplayContent(sanitizedContent);
-        setIsTyping(false);
-        clearInterval(interval);
+      if (structuredContent.overview) {
+        parts.push(structuredContent.overview);
       }
-    }, typingSpeed);
 
-    return () => clearInterval(interval);
-  }, [message.content, message.role, isUserMessage]);
+      if (structuredContent.analysis) {
+        parts.push(structuredContent.analysis);
+      }
+
+      if (structuredContent.comparativeAnalysis) {
+        const compAnalysis = structuredContent.comparativeAnalysis;
+        const compParts: string[] = [];
+
+        if (compAnalysis.feelingTactility) {
+          const tactility =
+            typeof compAnalysis.feelingTactility === 'string'
+              ? compAnalysis.feelingTactility
+              : `**Feeling & Tactility:**\n${compAnalysis.feelingTactility.description || ''}\n${compAnalysis.feelingTactility.keyDifferences || ''}\n${compAnalysis.feelingTactility.userImpact || ''}`;
+          compParts.push(tactility);
+        }
+
+        if (compAnalysis.soundProfile) {
+          const sound =
+            typeof compAnalysis.soundProfile === 'string'
+              ? compAnalysis.soundProfile
+              : `**Sound Profile:**\n${compAnalysis.soundProfile.description || ''}\n${compAnalysis.soundProfile.acousticDifferences || ''}\n${compAnalysis.soundProfile.environmentalConsiderations || ''}`;
+          compParts.push(sound);
+        }
+
+        if (compAnalysis.buildMaterialComposition) {
+          const build =
+            typeof compAnalysis.buildMaterialComposition === 'string'
+              ? compAnalysis.buildMaterialComposition
+              : `**Build & Material Composition:**\n${compAnalysis.buildMaterialComposition.materialComparison || ''}\n${compAnalysis.buildMaterialComposition.durabilityAssessment || ''}\n${compAnalysis.buildMaterialComposition.modificationPotential || ''}`;
+          compParts.push(build);
+        }
+
+        if (compAnalysis.performanceAspects) {
+          const performance =
+            typeof compAnalysis.performanceAspects === 'string'
+              ? compAnalysis.performanceAspects
+              : `**Performance Aspects:**\n${compAnalysis.performanceAspects.gamingPerformance || ''}\n${compAnalysis.performanceAspects.typingPerformance || ''}\n${compAnalysis.performanceAspects.consistencyReliability || ''}\n${compAnalysis.performanceAspects.fatigueFactors || ''}`;
+          compParts.push(performance);
+        }
+
+        if (compParts.length > 0) {
+          parts.push(`## Comparative Analysis\n\n${compParts.join('\n\n')}`);
+        }
+      }
+
+      if (structuredContent.conclusion) {
+        const conclusion =
+          typeof structuredContent.conclusion === 'string'
+            ? structuredContent.conclusion
+            : `## Conclusion\n\n${structuredContent.conclusion.primaryDifferences || ''}\n\n${structuredContent.conclusion.overallAssessment || ''}\n\n${structuredContent.conclusion.decisionGuidance || ''}`;
+        parts.push(conclusion);
+      }
+
+      return parts.length > 0 ? parts.join('\n\n') : '';
+    }
+
+    return typeof message.content === 'string' ? message.content : '';
+  };
+
+  const fullContent = getFullMessageContent();
+
+  useEffect(() => {
+    if (fullContent) {
+      const sanitizedContent = sanitizeHtml(fullContent);
+      setDisplayContent(sanitizedContent);
+      setIsTyping(false);
+      if (isLastMessage && onContentLoaded) {
+        setTimeout(() => onContentLoaded(), 50);
+      }
+    } else {
+      setDisplayContent('');
+      setIsTyping(false);
+    }
+  }, [fullContent, isLastMessage, onContentLoaded]);
 
   const messageVariants = {
     hidden: {
-      opacity: 0,
-      y: isUserMessage ? 10 : 20,
-      x: isUserMessage ? 10 : -10,
-      scale: 0.95
+      opacity: 0
     },
     visible: {
       opacity: 1,
-      y: 0,
-      x: 0,
-      scale: 1,
       transition: {
-        type: 'spring',
-        stiffness: 200,
-        damping: 20,
-        duration: 0.4
+        duration: 0.2
+      }
+    },
+    exit: {
+      opacity: 0,
+      transition: {
+        duration: 0.1
       }
     }
   };
@@ -331,7 +416,7 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
       variants={messageVariants}
       initial="hidden"
       animate="visible"
-      exit="hidden"
+      exit="exit"
       className={cn(
         'flex w-full items-start gap-x-4 py-4',
         isUserMessage ? 'justify-end pl-8 sm:pl-12' : 'justify-start pr-8 sm:pr-12'
@@ -365,25 +450,30 @@ export function ChatMessage({ message, isLastMessage, currentUser }: ChatMessage
           borderWidth: isUserMessage ? '0px' : '1px'
         }}
       >
-        <p className="whitespace-pre-wrap text-sm leading-relaxed">
-          {isLoading ? (
-            renderProgressiveLoader()
-          ) : isTyping && !isUserMessage ? (
-            <>
-              <span dangerouslySetInnerHTML={{ __html: displayContent }} />{' '}
-              <span className="animate-pulse" style={{ color: 'var(--sub-alt-color)' }}>
-                ▍
-              </span>
-            </>
-          ) : (
-            <span
-              dangerouslySetInnerHTML={{
-                __html: isUserMessage ? message.content : sanitizeHtml(message.content || '')
-              }}
-            />
-          )}
-        </p>
-        {!isUserMessage && message.analysis?.comparedSwitches && renderSwitchComparison()}
+        {isLoading ? (
+          renderProgressiveLoader()
+        ) : (
+          <div className="whitespace-pre-wrap text-sm leading-relaxed">
+            {isTyping && !isUserMessage ? (
+              <>
+                <span dangerouslySetInnerHTML={{ __html: displayContent }} />{' '}
+                <span className="animate-pulse" style={{ color: 'var(--sub-alt-color)' }}>
+                  ▍
+                </span>
+              </>
+            ) : (
+              <span
+                dangerouslySetInnerHTML={{
+                  __html: isUserMessage ? message.content : sanitizeHtml(displayContent)
+                }}
+              />
+            )}
+          </div>
+        )}
+        {!isUserMessage &&
+          !isLoading &&
+          message.analysis?.comparedSwitches &&
+          renderSwitchComparison()}
       </div>
       {isUserMessage && (
         <div
