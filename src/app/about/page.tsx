@@ -57,7 +57,7 @@ export default function AboutPage() {
           </section>
 
           <section className="mb-12 md:mb-16 fade-in-section opacity-0">
-            <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-6">our mission</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-6">my mission</h2>
             <p className="text-muted-foreground leading-relaxed">
               to empower keyboard enthusiasts of all levels to find their ideal mechanical keyboard
               switches through intelligent, data-driven, and user-friendly tools. we aim to
@@ -68,7 +68,7 @@ export default function AboutPage() {
 
           <section className="text-center fade-in-section opacity-0">
             <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-6">
-              connect with the creator
+              connect with me
             </h2>
             <p className="text-muted-foreground mb-4">
               have questions, feedback, or just want to chat about keyboards?
@@ -80,7 +80,7 @@ export default function AboutPage() {
                 rel="noopener noreferrer"
               >
                 <Linkedin className="mr-2 h-5 w-5" />
-                freddy song's linkedin profile
+                linkedin
               </a>
             </Button>
           </section>

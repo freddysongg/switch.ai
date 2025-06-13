@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { useAuth } from '@/hooks/use-auth.js';
+import { useAuth } from '@/contexts/auth-context';
 
 import { RegisterPage } from '@/app/register/page.js';
 
@@ -103,7 +103,12 @@ export function LoginPage() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+              style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
+            >
               {isLoading ? 'logging in...' : 'login'}
             </Button>
             <div className="text-center">

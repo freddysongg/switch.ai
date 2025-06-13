@@ -1,6 +1,14 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export function Footer() {
+  const navigate = useNavigate();
+
+  const handleAboutClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    navigate('/about');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <footer className="py-12 md:py-16 bg-background border-t border-border">
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
@@ -34,8 +42,11 @@ export function Footer() {
             <h3 className="font-semibold mb-3 text-foreground">company</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                {/* "About" link is correctly here */}
-                <Link to="/about" className="hover:text-foreground transition-colors">
+                <Link
+                  to="/about"
+                  onClick={handleAboutClick}
+                  className="hover:text-foreground transition-colors"
+                >
                   about
                 </Link>
               </li>
@@ -64,12 +75,12 @@ export function Footer() {
           </div>
           <div className="flex items-center gap-6 text-xs text-muted-foreground">
             <span>© {new Date().getFullYear()} switch.ai. all rights reserved.</span>
-            <a href="/privacy" className="hover:text-foreground transition-colors">
+            {/* <a href="/privacy" className="hover:text-foreground transition-colors">
               privacy
             </a>
             <a href="/terms" className="hover:text-foreground transition-colors">
               terms
-            </a>
+            </a> */}
           </div>
         </div>
       </div>

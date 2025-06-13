@@ -1,33 +1,80 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  metadata?: Record<string, any>;
-  createdAt: Date;
-  category?: string;
-  timestamp?: string;
-  comparison?: {
-    switch1: SwitchDetails;
-    switch2: SwitchDetails;
-    switch3?: SwitchDetails;
-    switch4?: SwitchDetails;
-    switch5?: SwitchDetails;
-  };
+import { AnalysisResponse } from './api';
+
+export type UserRole = 'user' | 'assistant';
+
+export interface StructuredContent {
+  overview?: string;
   analysis?: string;
+  conclusion?:
+    | string
+    | {
+        primaryDifferences?: string;
+        overallAssessment?: string;
+        decisionGuidance?: string;
+      };
+  comparativeAnalysis?: {
+    feelingTactility?:
+      | string
+      | {
+          description?: string;
+          keyDifferences?: string;
+          userImpact?: string;
+        };
+    soundProfile?:
+      | string
+      | {
+          description?: string;
+          acousticDifferences?: string;
+          environmentalConsiderations?: string;
+        };
+    buildMaterialComposition?:
+      | string
+      | {
+          materialComparison?: string;
+          durabilityAssessment?: string;
+          modificationPotential?: string;
+        };
+    performanceAspects?:
+      | string
+      | {
+          gamingPerformance?: string;
+          typingPerformance?: string;
+          consistencyReliability?: string;
+          fatigueFactors?: string;
+        };
+  };
 }
 
-export interface SwitchDetails {
-  name: string;
-  brand: string;
-  actuation_weight: string;
-  bottom_out: string;
-  pre_travel: string;
-  total_travel: string;
-  spring: string;
-  stem_material: string;
-  housing_material: string;
-  lubed_status: string;
+export interface ChatMessage {
+  id: string;
+  role: UserRole;
+  content: string | StructuredContent;
+  timestamp: string;
+  metadata: Record<string, unknown>;
+  analysis?: AnalysisResponse;
+  createdAt: Date;
+}
+
+export interface ChatMessageProps {
+  message: ChatMessage;
+  isLastMessage: boolean;
+  currentUser?: User;
+}
+
+export interface ChatInputProps {
+  onSendMessage: (message: string) => void;
+  isLoading?: boolean;
+}
+
+export interface ConversationListProps {
+  conversations: Conversation[];
+  currentConversationId: string | null;
+  onSelectConversation: (id: string) => void;
+  onDeleteConversation?: (id: string) => void;
+}
+
+export interface ConversationSidebarProps extends ConversationListProps {
+  onNewConversation: () => void;
 }
 
 export interface SwitchSearchResult {
@@ -48,34 +95,6 @@ export interface Conversation {
   category?: string;
   createdAt: Date;
   updatedAt: Date;
-}
-
-// Chat request/response interfaces
-export interface ChatRequest {
-  message: string;
-  conversationId?: string;
-}
-
-export interface ChatResponse {
-  id: string;
-  role: 'assistant';
-  content: string;
-  metadata?: Record<string, any>;
-}
-
-// Rate limiting interfaces
-export interface RateLimit {
-  userId: string;
-  endpoint: string;
-  count: number;
-  resetAt: Date;
-}
-
-// Analytics interfaces
-export interface AnalyticsEvent {
-  userId?: string;
-  eventType: string;
-  metadata: Record<string, any>;
 }
 
 export interface User {

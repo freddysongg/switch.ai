@@ -23,7 +23,7 @@ export default {
         background: 'var(--bg-color)',
         foreground: 'var(--text-color)',
         border: 'var(--border-color)',
-        input: 'var(--input-bg-color)',
+        input: 'var(--text-color)',
         ring: 'var(--caret-color)',
         
         primary: {

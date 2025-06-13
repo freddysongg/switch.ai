@@ -18,8 +18,8 @@ export function generateThemeName(id: string): string {
 }
 
 export const availableAppThemes: AppTheme[] = [
-  { name: 'Default Light', id: 'light', path: '', baseMode: 'light' },
-  { name: 'Default Dark', id: 'dark', path: '', baseMode: 'dark' },
+  { name: 'Default Light', id: 'light', path: '/themes/light.css', baseMode: 'light' },
+  { name: 'Default Dark', id: 'dark', path: '/themes/dark.css', baseMode: 'dark' },
   {
     name: '80s After Dark',
     id: '80s_after_dark',
@@ -305,8 +305,8 @@ export const availableAppThemes: AppTheme[] = [
 ];
 
 export const themeColorPreviews: Record<string, AppTheme['previewColors']> = {
-  light: { background: '#FFFFFF', text: '#09090B', primary: '#09090B' },
-  dark: { background: '#181a1f', text: '#f7fafc', primary: '#344589' },
+  light: { background: '#ffffff', text: '#0a0a0a', primary: '#007acc' },
+  dark: { background: '#0a0a0a', text: '#ffffff', primary: '#ffffff' },
   '80s_after_dark': { background: '#1b1d36', text: '#e1e7ec', primary: '#fca6d1' },
   '8008': { background: '#333a45', text: '#e9ecf0', primary: '#f44c7f' },
   '9009': { background: '#eeebe2', text: '#080909', primary: '#7fa480' },
@@ -487,77 +487,48 @@ export const themeColorPreviews: Record<string, AppTheme['previewColors']> = {
   vscode: { background: '#1e1e1e', text: '#d4d4d4', primary: '#007acc' },
   watermelon: { background: '#1f4437', text: '#cdc6bc', primary: '#d6686f' },
   wavez: { background: '#1c292f', text: '#e9efe6', primary: '#6bde3b' },
-  witch_girl: { background: '#f3dbda', text: '#56786a', primary: '#56786a' },
-  default: {
-    background: 'var(--bg-color)',
-    text: 'var(--text-color)',
-    primary: 'var(--main-color)'
-  } // Fallback if not in map
+  witch_girl: { background: '#f3dbda', text: '#56786a', primary: '#56786a' }
 };
 
-const DYNAMIC_THEME_LINK_ID = 'dynamic-app-theme-style';
-const THEME_STORAGE_KEY = 'switch-ai-active-theme-id';
+let activeThemeStyleElement: HTMLStyleElement | null = null;
 
-let currentBaseMode: 'light' | 'dark' = 'light';
-
-function setActiveThemeStylesheet(themePath?: string) {
-  const existingLink = document.getElementById(DYNAMIC_THEME_LINK_ID);
-  if (existingLink) {
-    existingLink.remove();
-  }
-  if (themePath) {
-    const link = document.createElement('link');
-    link.id = DYNAMIC_THEME_LINK_ID;
-    link.rel = 'stylesheet';
-    link.href = themePath;
-    document.head.appendChild(link);
-  }
+function themeCss(theme: AppTheme) {
+  return theme.path ? `@import url('${theme.path}');` : '';
 }
 
 export function applyTheme(themeId: string): void {
   const theme = availableAppThemes.find((t) => t.id === themeId);
-  const root = document.documentElement;
-
   if (!theme) {
-    console.warn(`Theme with id "${themeId}" not found. Reverting to default light.`);
-    applyTheme('light');
+    console.warn(`Theme '${themeId}' not found.`);
     return;
   }
 
-  root.classList.remove('light', 'dark');
+  const newThemeStyleElement = document.createElement('style');
+  newThemeStyleElement.id = `theme-${theme.id}`;
+  newThemeStyleElement.innerHTML = themeCss(theme);
+  document.head.appendChild(newThemeStyleElement);
 
-  if (theme.id === 'light' || theme.id === 'dark') {
-    root.classList.add(theme.id);
-    currentBaseMode = theme.id;
-    setActiveThemeStylesheet();
-    localStorage.setItem(THEME_STORAGE_KEY, theme.id);
-    window.dispatchEvent(new CustomEvent('themechanged', { detail: { theme: theme.id } }));
-  } else {
-    const base = theme.baseMode || currentBaseMode;
-    root.classList.add(base);
-    currentBaseMode = base;
-    setActiveThemeStylesheet(theme.path);
-    localStorage.setItem(THEME_STORAGE_KEY, theme.id);
-    window.dispatchEvent(
-      new CustomEvent('themechanged', { detail: { theme: theme.id, baseMode: base } })
-    );
+  if (activeThemeStyleElement) {
+    document.head.removeChild(activeThemeStyleElement);
   }
+
+  activeThemeStyleElement = newThemeStyleElement;
+
+  document.documentElement.classList.remove('light', 'dark');
+  document.documentElement.classList.add(theme.baseMode ?? 'dark');
+  document.documentElement.setAttribute('data-theme', theme.id);
+  localStorage.setItem('switch-ai-theme', theme.id);
+
+  window.dispatchEvent(
+    new CustomEvent('themechanged', { detail: { theme: theme.id, baseMode: theme.baseMode } })
+  );
 }
 
 export function loadSavedTheme(): void {
-  const savedThemeId = localStorage.getItem(THEME_STORAGE_KEY);
+  const savedThemeId = localStorage.getItem('switch-ai-theme');
   if (savedThemeId) {
-    const themeExists = availableAppThemes.some((t) => t.id === savedThemeId);
-    if (themeExists) {
-      applyTheme(savedThemeId);
-    } else {
-      console.warn(`Saved theme "${savedThemeId}" no longer exists. Reverting to default.`);
-      localStorage.removeItem(THEME_STORAGE_KEY); // Clear invalid theme
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      applyTheme(prefersDark ? 'dark' : 'light');
-    }
+    applyTheme(savedThemeId);
   } else {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    applyTheme(prefersDark ? 'dark' : 'light');
+    applyTheme('dark');
   }
 }
