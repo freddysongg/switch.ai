@@ -77,24 +77,31 @@ export const Header = React.memo(function Header() {
   }, [activeSection, navItems, location.pathname]);
 
   const handleLogoClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    console.log('[Header] handleLogoClick triggered.');
-    console.log('[Header] Current location.pathname:', location.pathname);
-    console.log('[Header] Current location.hash:', location.hash);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Header] handleLogoClick triggered.');
+      console.log('[Header] Current location.pathname:', location.pathname);
+      console.log('[Header] Current location.hash:', location.hash);
+    }
 
     if (location.pathname === '/') {
-      console.log('[Header] Already on the landing page.');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Header] Already on the landing page.');
+        console.log('[Header] Attempting to scroll to top smoothly.');
+      }
       event.preventDefault();
-
-      console.log('[Header] Attempting to scroll to top smoothly.');
       setActiveSection('');
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
       if (location.hash) {
-        console.log('[Header] Hash found, attempting to clear it using history.replaceState.');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Header] Hash found, attempting to clear it using history.replaceState.');
+        }
         history.replaceState(null, '', window.location.pathname);
       }
     } else {
-      console.log("[Header] Not on the landing page. Allowing Link to navigate to '/'.");
+      if (process.env.NODE_ENV === 'development') {
+        console.log("[Header] Not on the landing page. Allowing Link to navigate to '/'.");
+      }
     }
   };
 
