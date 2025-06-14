@@ -67,8 +67,19 @@ export function ChatMessage({
       return typeof message.content === 'string' ? message.content : '';
     }
 
-    if (typeof message.content === 'object' && message.content !== null) {
-      const structuredContent = message.content as StructuredContent;
+    let structuredContent: StructuredContent | null = null;
+
+    if (message.analysis) {
+      structuredContent = message.analysis;
+    } else if (typeof message.content === 'object' && message.content !== null) {
+      structuredContent = message.content as StructuredContent;
+    } else if (message.metadata && typeof message.metadata === 'object') {
+      if ('overview' in message.metadata) {
+        structuredContent = message.metadata as StructuredContent;
+      }
+    }
+
+    if (structuredContent) {
       const parts: string[] = [];
 
       if (structuredContent.overview) {
@@ -128,7 +139,8 @@ export function ChatMessage({
         parts.push(conclusion);
       }
 
-      return parts.length > 0 ? parts.join('\n\n') : '';
+      const result = parts.length > 0 ? parts.join('\n\n') : '';
+      return result;
     }
 
     return typeof message.content === 'string' ? message.content : '';
