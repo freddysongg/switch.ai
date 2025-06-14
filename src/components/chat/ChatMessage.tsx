@@ -184,20 +184,164 @@ export function ChatMessage({
     if (!isLoading) return null;
     const steps = message.metadata?.loadingSteps as string[];
 
+    const getStepIcon = (stepText: string) => {
+      if (
+        stepText.toLowerCase().includes('analyzing') ||
+        stepText.toLowerCase().includes('intent')
+      ) {
+        return (
+          <div className="flex items-center justify-center w-6 h-6 rounded-md">
+            <span className="text-xs font-mono" style={{ color: 'var(--text-color)' }}>
+              🔍
+            </span>
+          </div>
+        );
+      }
+
+      if (
+        stepText.toLowerCase().includes('database') ||
+        stepText.toLowerCase().includes('searching')
+      ) {
+        return (
+          <div className="flex items-center justify-center w-6 h-6 rounded-md">
+            <span className="text-xs" style={{ color: 'var(--text-color)' }}>
+              🗄️
+            </span>
+          </div>
+        );
+      }
+
+      if (
+        stepText.toLowerCase().includes('format') ||
+        stepText.toLowerCase().includes('response')
+      ) {
+        return (
+          <div className="flex items-center justify-center w-6 h-6 rounded-md">
+            <span className="text-xs" style={{ color: 'var(--text-color)' }}>
+              ⚡
+            </span>
+          </div>
+        );
+      }
+
+      return (
+        <div className="flex items-center justify-center w-6 h-6 rounded-md">
+          <span className="text-xs" style={{ color: 'var(--text-color)' }}>
+            ●
+          </span>
+        </div>
+      );
+    };
+
+    const getStepSubtext = (stepText: string) => {
+      if (
+        stepText.toLowerCase().includes('analyzing') ||
+        stepText.toLowerCase().includes('intent')
+      ) {
+        return 'Understanding your query...';
+      }
+      if (
+        stepText.toLowerCase().includes('database') ||
+        stepText.toLowerCase().includes('searching')
+      ) {
+        return 'Indexing through our database of 15,000+ switches...';
+      }
+      if (
+        stepText.toLowerCase().includes('format') ||
+        stepText.toLowerCase().includes('response')
+      ) {
+        return 'Generating response...';
+      }
+      return '';
+    };
+
     return (
-      <div className="p-4 space-y-2">
-        {steps.map((step, index) => (
-          <motion.div
-            key={index}
-            className="flex items-center gap-2 text-sm"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.2 }}
-          >
-            <span className="text-main-color">✓</span>
-            <span>{step}</span>
-          </motion.div>
-        ))}
+      <div
+        className="p-6 space-y-6 rounded-lg"
+        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+      >
+        {steps.map((step, index) => {
+          const isActive = index === steps.length - 1;
+          const isCompleted = index < steps.length - 1;
+          const subtext = getStepSubtext(step);
+
+          return (
+            <motion.div
+              key={index}
+              className="space-y-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.3, duration: 0.4 }}
+            >
+              <div className="flex items-center gap-3">
+                {getStepIcon(step)}
+                <div className="flex-1">
+                  <div className="text-sm font-medium" style={{ color: 'var(--text-color)' }}>
+                    {step}
+                  </div>
+                  {subtext && (
+                    <div className="text-xs mt-1" style={{ color: 'var(--sub-alt-color)' }}>
+                      {subtext}
+                    </div>
+                  )}
+                </div>
+                {isCompleted && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: index * 0.3 + 0.2 }}
+                    style={{ color: 'var(--main-color)' }}
+                  >
+                    ✓
+                  </motion.div>
+                )}
+              </div>
+
+              {isActive && (
+                <motion.div
+                  className="ml-9 flex items-center gap-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: index * 0.3 + 0.3 }}
+                >
+                  <div className="flex gap-1">
+                    {[0, 1, 2, 3, 4].map((dotIndex) => (
+                      <motion.div
+                        key={dotIndex}
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ backgroundColor: 'var(--main-color)' }}
+                        animate={{
+                          opacity: [0.3, 1, 0.3],
+                          scale: [0.8, 1.2, 0.8]
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          delay: dotIndex * 0.1,
+                          ease: 'easeInOut'
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs animate-pulse" style={{ color: 'var(--sub-alt-color)' }}>
+                    Processing...
+                  </span>
+                </motion.div>
+              )}
+
+              {/* Progress line */}
+              {index < steps.length - 1 && (
+                <motion.div
+                  className="ml-3 w-px h-4"
+                  style={{ backgroundColor: 'var(--sub-alt-color)' }}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 16, opacity: 0.3 }}
+                  transition={{ delay: index * 0.3 + 0.5, duration: 0.3 }}
+                />
+              )}
+            </motion.div>
+          );
+        })}
       </div>
     );
   };

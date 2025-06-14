@@ -107,10 +107,9 @@ export function ChatInput({ onSendMessage, isLoading = false }: ChatInputProps) 
   return (
     <motion.form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-2 p-4 md:p-6 border-t backdrop-blur-sm"
+      className="flex flex-col gap-2 p-4 md:p-6 backdrop-blur-sm"
       style={{
         backgroundColor: 'var(--bg-color)',
-        borderColor: 'var(--sub-color)',
         color: 'var(--text-color)'
       }}
       initial={{ opacity: 0, y: 20 }}

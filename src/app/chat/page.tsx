@@ -234,12 +234,12 @@ export default function ChatInterface() {
 
     setMessages((prev) => [...prev, newUserMessage]);
 
-    setLoadingSteps(['Analyzing intent...']);
+    setLoadingSteps(['Analyzing intent']);
     setIsLoading(true);
 
     try {
-      setTimeout(() => setLoadingSteps((prev) => [...prev, 'Searching database...']), 1500);
-      setTimeout(() => setLoadingSteps((prev) => [...prev, 'Formatting response...']), 3000);
+      setTimeout(() => setLoadingSteps((prev) => [...prev, 'Searching database']), 1500);
+      setTimeout(() => setLoadingSteps((prev) => [...prev, 'Formatting response']), 3000);
 
       const response = await retryApiCall(() =>
         chatApi.sendMessage({
@@ -367,7 +367,7 @@ export default function ChatInterface() {
                   <div ref={messagesEndRef} className="h-1" />
                 </AnimatePresence>
               </ScrollArea>
-              <div className="border-t bg-background p-4">
+              <div className="bg-background p-4">
                 <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
               </div>
             </>
