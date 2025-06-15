@@ -4,7 +4,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { AuthProvider } from '@/contexts/AuthContext';
-import { loadSavedTheme } from '@/lib/ThemeService';
+import { loadSavedTheme } from '@/lib/themeService';
 
 import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';

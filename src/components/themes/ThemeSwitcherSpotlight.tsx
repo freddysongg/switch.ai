@@ -3,7 +3,7 @@
 import { Palette } from 'lucide-react';
 import * as React from 'react';
 
-import { applyTheme, AppTheme, availableAppThemes, themeColorPreviews } from '@/lib/ThemeService';
+import { applyTheme, AppTheme, availableAppThemes, themeColorPreviews } from '@/lib/themeService';
 import { cn } from '@/lib/utils.js';
 
 import {
