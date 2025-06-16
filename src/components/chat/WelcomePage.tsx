@@ -66,7 +66,7 @@ export function WelcomePage({ onSendMessage, isLoading }: WelcomePageProps) {
         >
           <div className="mb-8 inline-flex items-center justify-center">
             <motion.img
-              src="/assets/icons/switch.ai v2 Logo.png"
+              src="/public/assets/icons/switch.ai v2 Logo.png"
               alt="switch.ai"
               className="w-20 h-20 sm:w-24 sm:h-24 object-contain"
               whileHover={{ scale: 1.1, rotate: 5 }}

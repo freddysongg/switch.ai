@@ -55,11 +55,11 @@ export const Header = React.memo(function Header() {
         setActiveSection(currentSection);
       };
 
-      handleScroll(); // Initial check
+      handleScroll();
       window.addEventListener('scroll', handleScroll, { passive: true });
       return () => window.removeEventListener('scroll', handleScroll);
     } else {
-      setActiveSection(''); // Clear active section if not on landing page
+      setActiveSection('');
     }
   }, [navItems, location.pathname]);
 
@@ -116,7 +116,7 @@ export const Header = React.memo(function Header() {
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center gap-2" onClick={handleLogoClick}>
               <motion.img
-                src="/assets/icons/switch.ai v2 Logo.png"
+                src="/public/assets/icons/switch.ai v2 Logo.png"
                 alt="switch.ai"
                 className="h-8 w-8"
                 style={{ willChange: 'transform' }}
