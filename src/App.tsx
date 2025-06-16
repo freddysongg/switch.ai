@@ -23,6 +23,12 @@ const LandingPage = lazy(() => import('@/app/marketing/page'));
 const RegisterPage = lazy(() =>
   import('@/app/register/page').then((module) => ({ default: module.RegisterPage }))
 );
+const ComingSoonPage = lazy(() =>
+  import('@/app/coming-soon/page').then((module) => ({ default: module.ComingSoonPage }))
+);
+const NotFoundPage = lazy(() =>
+  import('@/app/not-found/page').then((module) => ({ default: module.NotFoundPage }))
+);
 
 function AppContent() {
   const { currentUser, isLoading } = useAuth();
@@ -134,7 +140,9 @@ function AppContent() {
             )
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/coming-soon" element={<ComingSoonPage />} />
+        <Route path="/not-found" element={<NotFoundPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
   );

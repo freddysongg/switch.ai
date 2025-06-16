@@ -5,7 +5,7 @@ import { ArrowRight, Bot, Search, Sparkles, Target, TrendingUp, Users, Zap } fro
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { useAuth } from '@/contexts/auth-context';
+// import { useAuth } from '@/contexts/auth-context';
 
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
@@ -23,23 +23,20 @@ import { TransitionPanel } from '@/components/ui/transition-panel';
 export default function LandingPage() {
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  // const { currentUser } = useAuth();
 
   const handleGetStartedWithEmail = () => {
-    console.log('Email for signup:', email);
-    if (currentUser) {
-      navigate('/chat');
-    } else {
-      navigate('/register', { state: { emailFromLanding: email } });
-    }
+    // console.log('Email for signup:', email);
+    // if (currentUser) {
+    //   navigate('/chat');
+    // } else {
+    //   navigate('/register', { state: { emailFromLanding: email } });
+    // }
+    navigate('/coming-soon');
   };
 
   const handleTryTheApp = () => {
-    if (currentUser) {
-      navigate('/chat');
-    } else {
-      navigate('/register');
-    }
+    navigate('/coming-soon');
   };
 
   const trustedBrands = [
@@ -130,28 +127,32 @@ export default function LandingPage() {
                     title: 'ai recommendations',
                     desc: 'switch.ai analyzes your preferences to recommend the perfect switches for your needs.',
                     linkText: 'learn more',
-                    href: '/chat'
+                    // href: '/chat'
+                    href: '/coming-soon'
                   },
                   {
                     icon: Search,
                     title: 'switch database',
                     desc: 'access detailed specs and comparisons for hundreds of mechanical keyboard switches.',
                     linkText: 'explore database',
-                    href: '/chat'
+                    // href: '/chat'
+                    href: '/coming-soon'
                   },
                   {
                     icon: Sparkles,
                     title: 'interactive chat',
                     desc: 'chat with switch.ai to get instant, detailed answers about any switch. no jargon required.',
                     linkText: 'start chatting',
-                    href: '/chat'
+                    // href: '/chat'
+                    href: '/coming-soon'
                   },
                   {
                     icon: TrendingUp,
                     title: 'smart comparisons',
                     desc: 'get detailed comparisons, highlighting key differences and similarities between switches.',
                     linkText: 'see comparisons',
-                    href: '/chat'
+                    // href: '/chat'
+                    href: '/coming-soon'
                   }
                 ].map((feature, index) => (
                   <TransitionPanel
