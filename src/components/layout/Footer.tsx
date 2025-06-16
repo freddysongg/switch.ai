@@ -71,7 +71,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-border">
           <div className="flex items-center gap-2 mb-4 md:mb-0">
             <img
-              src="/public/assets/icons/switch.ai v2 Logo.png"
+              src="public/switch.ai v2 Logo.png"
               alt="switch.ai"
               className="h-6 w-6"
             />

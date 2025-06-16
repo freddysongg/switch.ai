@@ -109,7 +109,7 @@ export function ChatHeader({
             >
               <div className="relative">
                 <motion.img
-                  src="/public/assets/icons/switch.ai v2 Logo.png"
+                  src="public/switch.ai v2 Logo.png"
                   alt="switch.ai logo"
                   className="h-10 w-10"
                   animate={{ rotate: isAiThinking ? 360 : 0 }}

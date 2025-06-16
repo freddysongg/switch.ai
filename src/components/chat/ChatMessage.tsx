@@ -581,7 +581,7 @@ export function ChatMessage({
     >
       {!isUserMessage && (
         <motion.img
-          src="/public/assets/icons/switch.ai v2 Logo.png"
+          src="public/switch.ai v2 Logo.png"
           alt="AI"
           className="h-7 w-7 rounded-full flex-shrink-0 mt-1 opacity-90"
           initial={{ scale: 0.5, opacity: 0 }}
