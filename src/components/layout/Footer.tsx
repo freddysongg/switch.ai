@@ -70,11 +70,7 @@ export function Footer() {
         </div>
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-border">
           <div className="flex items-center gap-2 mb-4 md:mb-0">
-            <img
-              src="/switch-ai-logo.png"
-              alt="switch.ai"
-              className="h-6 w-6"
-            />
+            <img src="/switch-ai-logo.png" alt="switch.ai" className="h-6 w-6" />
             <span className="font-semibold lowercase text-foreground">switch.ai</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-muted-foreground">

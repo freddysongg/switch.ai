@@ -23,7 +23,6 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
     if (!email.trim()) {
       toast({
         title: 'error',
@@ -122,7 +121,12 @@ export function RegisterPage({ onSwitchToLogin }: RegisterPageProps) {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+              style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
+            >
               {isLoading ? 'creating account...' : 'create account'}
             </Button>
             <div className="text-center">

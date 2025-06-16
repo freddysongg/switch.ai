@@ -1,6 +1,6 @@
 # switch.ai | Mechanical Keyboard Switch Assistant
 
-![switch.ai Logo](public/switch-ai-logo.png)
+![switch.ai Logo](public/switch-ai-logo-small.png)
 
 switch.ai is a web-based application designed to help users discover and choose the perfect mechanical keyboard switches based on their preferences. It features an interactive assistant to guide users through the selection process.
 

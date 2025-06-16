@@ -25,7 +25,6 @@ export function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
     if (!email.trim()) {
       toast({
         title: 'error',
@@ -51,7 +50,6 @@ export function LoginPage() {
         title: 'success',
         description: 'login successful'
       });
-      // Navigation will be handled by the app based on auth state
     } catch (error: unknown) {
       let errorMessage = 'login failed. please try again.';
 
