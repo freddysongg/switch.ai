@@ -4,7 +4,12 @@ import { Palette } from 'lucide-react';
 import * as React from 'react';
 
 import { cn } from '@/lib/oauth.js';
-import { applyTheme, AppTheme, availableAppThemes, themeColorPreviews } from '@/lib/ThemeService';
+import {
+  applyTheme,
+  AppTheme,
+  availableAppThemes,
+  themeColorPreviews
+} from '@/lib/ThemeService.js';
 
 import {
   Command,
