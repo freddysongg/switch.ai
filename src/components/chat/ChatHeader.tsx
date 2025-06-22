@@ -173,7 +173,7 @@ export function ChatHeader({
                       borderColor: 'var(--sub-color)'
                     }}
                     glowColor={`color-mix(in srgb, var(--main-color) 20%, transparent)`}
-                    glownintensity={0.7}
+                    glowintensity={0.7}
                   >
                     <motion.div
                       className="h-6 w-6 rounded-full flex items-center justify-center"

@@ -8,14 +8,14 @@ import { Button, type ButtonProps } from '@/components/ui/button';
 
 interface GlowButtonProps extends ButtonProps {
   glowColor?: string;
-  glownintensity?: number;
+  glowintensity?: number;
 }
 
 export function GlowButton({
   children,
   className,
   glowColor = 'hsl(var(--primary))',
-  glownintensity = 0.6,
+  glowintensity = 0.6,
   ...props
 }: GlowButtonProps) {
   return (
@@ -28,7 +28,7 @@ export function GlowButton({
           opacity: 0
         }}
         animate={{
-          opacity: [0, glownintensity, 0]
+          opacity: [0, glowintensity, 0]
         }}
         transition={{
           duration: 2,

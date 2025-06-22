@@ -160,7 +160,7 @@ export function ChatInput({ onSendMessage, isLoading = false }: ChatInputProps) 
             } as React.CSSProperties
           }
           glowColor={hasErrors ? 'rgb(239 68 68)' : currentMainColor}
-          glownintensity={hasErrors ? 0.3 : 0.8}
+          glowintensity={hasErrors ? 0.3 : 0.8}
         >
           <SendHorizontal className="h-5 w-5" />
           <span className="sr-only">send message</span>
