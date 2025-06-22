@@ -9,6 +9,7 @@
  */
 
 import { ApiClient, AuthenticationError } from '../api/ApiClient';
+import { ToastService } from '../ToastService';
 
 export interface TokenData {
   token: string;
@@ -357,5 +358,100 @@ export class AuthService {
     }
 
     return this.getToken();
+  }
+
+  /**
+   * Initiate Google OAuth flow
+   * This will redirect the user to Google's consent screen
+   */
+  loginWithGoogle(): void {
+    try {
+      ToastService.showGoogleAuthEvent('initiate');
+      this.apiClient.initiateGoogleOAuth();
+    } catch (error) {
+      console.error('Failed to initiate Google OAuth:', error);
+      ToastService.handleGoogleOAuthError(error as Error, 'initiate');
+      throw new Error('Failed to start Google authentication');
+    }
+  }
+
+  /**
+   * Handle Google OAuth callback after user returns from Google
+   * @param params - The callback parameters containing authorization code
+   */
+  async handleGoogleCallback(params: { code: string; state?: string }): Promise<void> {
+    try {
+      const response = await this.apiClient.handleGoogleCallback<{
+        message: string;
+        token: string;
+        user: {
+          id: string;
+          email: string;
+          name?: string | null;
+          role: string;
+        };
+      }>(params.code, params.state);
+
+      const payload = this.parseJWTPayload(response.data.token);
+      const expiresAt = payload?.exp ? payload.exp * 1000 : Date.now() + 24 * 60 * 60 * 1000;
+
+      const tokenData: TokenData = {
+        token: response.data.token,
+        expiresAt,
+        user: {
+          id: response.data.user.id,
+          email: response.data.user.email,
+          name: response.data.user.name || undefined,
+          role: response.data.user.role
+        }
+      };
+
+      this.setAuth(tokenData);
+      ToastService.showGoogleAuthEvent('success');
+    } catch (error) {
+      console.error('Google OAuth callback failed:', error);
+      ToastService.handleGoogleOAuthError(error as Error, 'callback');
+
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+      throw new Error('Google authentication failed. Please try again.');
+    }
+  }
+
+  /**
+   * Authenticate user with a provided JWT token (for OAuth redirects)
+   * @param token - The JWT token from OAuth callback
+   */
+  async authenticateWithToken(token: string): Promise<void> {
+    try {
+      const payload = this.parseJWTPayload(token);
+
+      if (!payload) {
+        throw new Error('Invalid token format');
+      }
+
+      const expiresAt = payload?.exp ? payload.exp * 1000 : Date.now() + 24 * 60 * 60 * 1000;
+
+      const user = {
+        id: String(payload.id || payload.sub || ''),
+        email: String(payload.email || ''),
+        name: payload.name ? String(payload.name) : undefined,
+        role: String(payload.role || 'user')
+      };
+
+      const tokenData: TokenData = {
+        token,
+        expiresAt,
+        user
+      };
+
+      this.setAuth(tokenData);
+      ToastService.showGoogleAuthEvent('success');
+    } catch (error) {
+      console.error('Token authentication failed:', error);
+      ToastService.handleGoogleOAuthError(error as Error, 'callback');
+      throw new Error('Failed to authenticate with provided token');
+    }
   }
 }

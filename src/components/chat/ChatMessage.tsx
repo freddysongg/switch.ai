@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-import { cn } from '@/lib/utils.js';
+import { cn } from '@/lib/oauth.js';
 
 import type { ComparisonSwitchData } from '@/types/api';
 import type { ChatMessage as ChatMessageType, StructuredContent, User } from '@/types/chat';

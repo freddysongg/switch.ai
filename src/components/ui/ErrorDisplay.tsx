@@ -2,8 +2,8 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertTriangle, RefreshCw, X } from 'lucide-react';
 
-import { getErrorDetails } from '@/lib/error-utils';
-import { cn } from '@/lib/utils';
+import { getErrorDetails } from '@/lib/error';
+import { cn } from '@/lib/oauth';
 
 import { Alert, AlertDescription, AlertTitle } from './alert';
 import { Button } from './button';

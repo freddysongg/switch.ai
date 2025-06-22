@@ -4,7 +4,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { AuthProvider } from '@/contexts/AuthContext';
-import { loadSavedTheme } from '@/lib/themeService';
+import { loadSavedTheme } from '@/lib/ThemeService';
 
 import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';
@@ -29,6 +29,10 @@ const ComingSoonPage = lazy(() =>
 const NotFoundPage = lazy(() =>
   import('@/app/not-found/page').then((module) => ({ default: module.NotFoundPage }))
 );
+const GoogleCallbackPage = lazy(() =>
+  import('@/app/auth/callback/page').then((module) => ({ default: module.GoogleCallbackPage }))
+);
+const PrivacyPage = lazy(() => import('@/app/privacy/page'));
 
 function AppContent() {
   const { currentUser, isLoading } = useAuth();
@@ -124,7 +128,17 @@ function AppContent() {
         />
         <Route
           path="/login"
-          element={!currentUser ? <LoginPage /> : <Navigate to="/chat" replace />}
+          element={
+            !currentUser ? (
+              <LoginPage
+                onSwitchToRegister={() => {
+                  navigate('/register');
+                }}
+              />
+            ) : (
+              <Navigate to="/chat" replace />
+            )
+          }
         />
         <Route
           path="/register"
@@ -141,6 +155,8 @@ function AppContent() {
           }
         />
         <Route path="/coming-soon" element={<ComingSoonPage />} />
+        <Route path="/auth/callback" element={<GoogleCallbackPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/not-found" element={<NotFoundPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

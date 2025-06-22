@@ -18,6 +18,22 @@ export interface AuthResponse {
   };
 }
 
+export interface GoogleOAuthCallbackParams {
+  code: string;
+  state?: string;
+}
+
+export interface GoogleAuthResponse {
+  message: string;
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    name?: string | null;
+    role: string;
+  };
+}
+
 export interface RegisterResponse {
   message: string;
   userId: string;
@@ -37,6 +53,9 @@ export interface AuthContextType {
   isLoading: boolean;
   login: (email: string, pass: string) => Promise<void>;
   register: (email: string, pass: string, name?: string) => Promise<void>;
+  loginWithGoogle: () => void;
+  handleGoogleCallback: (params: GoogleOAuthCallbackParams) => Promise<void>;
+  authenticateWithToken: (token: string) => Promise<void>;
   logout: () => void;
   isAdmin: () => boolean;
   refreshToken: () => Promise<void>;

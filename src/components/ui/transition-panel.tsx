@@ -3,7 +3,7 @@
 import { motion } from 'motion/react';
 import type * as React from 'react';
 
-import { cn } from '@/lib/utils.js';
+import { cn } from '@/lib/oauth.js';
 
 interface TransitionPanelProps {
   children: React.ReactNode;

@@ -424,7 +424,40 @@ export class ApiClient {
     data?: any,
     config?: Partial<RequestConfig>
   ): Promise<ApiResponse<T>> {
-    return this.request<T>({ method: 'PATCH', url, data, ...config });
+    return this.request({ method: 'PATCH', url, data, ...config });
+  }
+
+  /**
+   * Initiate Google OAuth flow
+   * This will redirect the user to Google's consent screen
+   */
+  initiateGoogleOAuth(): void {
+    const authUrl = `${this.config.baseURL}/auth/google`;
+    window.location.href = authUrl;
+  }
+
+  /**
+   * Handle Google OAuth callback
+   * This method is typically called after Google redirects back to the application
+   * @param code - Authorization code from Google
+   * @param state - State parameter for CSRF protection (optional)
+   */
+  async handleGoogleCallback<T = any>(code: string, state?: string): Promise<ApiResponse<T>> {
+    const params: Record<string, string> = { code };
+    if (state) {
+      params.state = state;
+    }
+
+    return this.get<T>('/auth/google/callback', {
+      params
+    });
+  }
+
+  /**
+   * Get current user information (requires authentication)
+   */
+  async getCurrentUser<T = any>(): Promise<ApiResponse<T>> {
+    return this.get<T>('/auth/me');
   }
 
   /**

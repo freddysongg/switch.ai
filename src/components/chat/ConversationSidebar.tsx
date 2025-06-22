@@ -11,11 +11,11 @@ import {
 import { useRef, useState } from 'react';
 
 import { useIsMobile } from '@/hooks/use-mobile.js';
-import { cn } from '@/lib/utils.js';
+import { cn } from '@/lib/oauth.js';
 
 import { ConversationListProps, ConversationSidebarProps } from '@/types/chat';
 
-import { GlowButton } from '@/components/ui/glow-button.js';
+import { Button } from '@/components/ui/button.js';
 import { Input } from '@/components/ui/input.js';
 import { ScrollArea } from '@/components/ui/scroll-area.js';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet.js';
@@ -53,7 +53,7 @@ export function ConversationSidebarDesktop({
           {!isCollapsed && (
             <motion.div
               key="expanded"
-              className="absolute inset-4 top-32"
+              className="absolute left-6 right-4 bottom-20 top-60 z-30"
               initial={{ opacity: 0, scale: 0.96, x: -20 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.96, x: -20 }}
@@ -86,38 +86,40 @@ export function ConversationSidebarDesktop({
                         </h2>
                       </div>
                       <div className="flex items-center gap-1">
-                        <GlowButton
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 hover:bg-accent hover:text-accent-foreground"
-                          style={
-                            {
-                              '--hover-bg': 'var(--sub-alt-color)',
-                              color: 'var(--text-color)'
-                            } as React.CSSProperties
-                          }
-                          onClick={onNewConversation}
-                          glowColor={`color-mix(in srgb, var(--main-color) 15%, transparent)`}
-                          glowIntensity={0.6}
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          transition={{ duration: 0.2 }}
                         >
-                          <PlusCircle className="h-4 w-4" />
-                        </GlowButton>
-                        <GlowButton
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 hover:bg-accent"
-                          style={
-                            {
-                              '--hover-bg': 'var(--sub-alt-color)',
-                              color: 'var(--text-color)'
-                            } as React.CSSProperties
-                          }
-                          onClick={handleToggle}
-                          glowColor={`color-mix(in srgb, var(--main-color) 15%, transparent)`}
-                          glowIntensity={0.6}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-transparent"
+                            style={{ color: 'var(--text-color)' }}
+                            onClick={onNewConversation}
+                          >
+                            <motion.div whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
+                              <PlusCircle className="h-4 w-4" />
+                            </motion.div>
+                          </Button>
+                        </motion.div>
+                        <motion.div
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          transition={{ duration: 0.2 }}
                         >
-                          <ChevronLeft className="h-4 w-4" />
-                        </GlowButton>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-transparent"
+                            style={{ color: 'var(--text-color)' }}
+                            onClick={handleToggle}
+                          >
+                            <motion.div whileHover={{ x: -2 }} transition={{ duration: 0.2 }}>
+                              <ChevronLeft className="h-4 w-4" />
+                            </motion.div>
+                          </Button>
+                        </motion.div>
                       </div>
                     </div>
 
@@ -158,7 +160,7 @@ export function ConversationSidebarDesktop({
           {isCollapsed && (
             <motion.div
               key="collapsed"
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-50"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-30"
               initial={{ opacity: 0, scale: 0.8, x: -30 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.8, x: -30 }}
@@ -180,38 +182,40 @@ export function ConversationSidebarDesktop({
                 transition={{ duration: 0.2 }}
               >
                 <div className="flex flex-col items-center gap-3">
-                  <GlowButton
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 transition-transform hover:scale-110"
-                    style={
-                      {
-                        color: 'var(--text-color)',
-                        '--hover-bg': 'var(--sub-alt-color)'
-                      } as React.CSSProperties
-                    }
-                    onClick={onNewConversation}
-                    glowColor={`color-mix(in srgb, var(--main-color) 20%, transparent)`}
-                    glowIntensity={0.8}
+                  <motion.div
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <PlusCircle className="h-5 w-5" />
-                  </GlowButton>
-                  <GlowButton
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 transition-transform hover:scale-110"
-                    style={
-                      {
-                        color: 'var(--text-color)',
-                        '--hover-bg': 'var(--sub-alt-color)'
-                      } as React.CSSProperties
-                    }
-                    onClick={handleToggle}
-                    glowColor={`color-mix(in srgb, var(--main-color) 20%, transparent)`}
-                    glowIntensity={0.8}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10 hover:bg-transparent"
+                      style={{ color: 'var(--text-color)' }}
+                      onClick={onNewConversation}
+                    >
+                      <motion.div whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
+                        <PlusCircle className="h-5 w-5" />
+                      </motion.div>
+                    </Button>
+                  </motion.div>
+                  <motion.div
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <ChevronLeft className="h-4 w-4 rotate-180" />
-                  </GlowButton>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-transparent"
+                      style={{ color: 'var(--text-color)' }}
+                      onClick={handleToggle}
+                    >
+                      <motion.div whileHover={{ x: 2 }} transition={{ duration: 0.2 }}>
+                        <ChevronLeft className="h-4 w-4 rotate-180" />
+                      </motion.div>
+                    </Button>
+                  </motion.div>
                 </div>
               </motion.div>
             </motion.div>
@@ -291,19 +295,26 @@ function ConversationList({
 
             {conversation.id !== currentConversationId && onDeleteConversation && (
               <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-transform duration-150 ease-in-out">
-                <GlowButton
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/20"
-                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                    e.stopPropagation();
-                    onDeleteConversation(conversation.id);
-                  }}
-                  glowColor="rgba(239, 68, 68, 0.3)"
-                  glowIntensity={0.5}
+                <motion.div
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <Trash2 className="h-3 w-3" />
-                </GlowButton>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 hover:bg-transparent"
+                    style={{ color: 'var(--sub-color)' }}
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                      e.stopPropagation();
+                      onDeleteConversation(conversation.id);
+                    }}
+                  >
+                    <motion.div whileHover={{ rotate: 15 }} transition={{ duration: 0.2 }}>
+                      <Trash2 className="h-3 w-3" />
+                    </motion.div>
+                  </Button>
+                </motion.div>
               </div>
             )}
           </div>
@@ -350,38 +361,62 @@ export function ConversationSidebarMobile({
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <GlowButton
-          variant="ghost"
-          size="icon"
-          className="md:hidden fixed left-4 top-8 z-20 h-10 w-10 bg-background/80 backdrop-blur-xl border border-border rounded-xl hover:bg-accent"
-          glowColor={`color-mix(in srgb, var(--main-color) 20%, transparent)`}
-          glowIntensity={0.7}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.2 }}
         >
-          <MessageSquare className="h-5 w-5 text-foreground" />
-        </GlowButton>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden fixed left-4 top-8 z-20 h-10 w-10 backdrop-blur-xl border rounded-xl hover:bg-transparent"
+            style={{
+              backgroundColor: 'var(--bg-color)',
+              borderColor: 'var(--sub-color)',
+              color: 'var(--text-color)'
+            }}
+          >
+            <motion.div whileHover={{ rotate: 5 }} transition={{ duration: 0.2 }}>
+              <MessageSquare className="h-5 w-5" />
+            </motion.div>
+          </Button>
+        </motion.div>
       </SheetTrigger>
       <SheetContent
         side="left"
-        className="p-0 w-80 bg-background/95 backdrop-blur-xl border-border"
+        className="p-0 w-80 backdrop-blur-xl border"
+        style={{
+          backgroundColor: 'var(--bg-color)',
+          borderColor: 'var(--sub-color)'
+        }}
       >
-        <div className="p-6 border-b border-border/30">
+        <div className="p-6 border-b" style={{ borderColor: 'var(--sub-alt-color)' }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-accent/20 rounded-lg">
-                <MessageSquare className="h-4 w-4 text-accent-foreground" />
+              <div className="p-2 rounded-lg" style={{ backgroundColor: 'var(--sub-alt-color)' }}>
+                <MessageSquare className="h-4 w-4" style={{ color: 'var(--text-color)' }} />
               </div>
-              <h2 className="text-lg font-semibold text-foreground">chats</h2>
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--text-color)' }}>
+                chats
+              </h2>
             </div>
-            <GlowButton
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 hover:bg-accent hover:text-accent-foreground"
-              onClick={handleNewAndClose}
-              glowColor={`color-mix(in srgb, var(--main-color) 15%, transparent)`}
-              glowIntensity={0.6}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
             >
-              <PlusCircle className="h-4 w-4" />
-            </GlowButton>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 hover:bg-transparent"
+                style={{ color: 'var(--text-color)' }}
+                onClick={handleNewAndClose}
+              >
+                <motion.div whileHover={{ rotate: 90 }} transition={{ duration: 0.2 }}>
+                  <PlusCircle className="h-4 w-4" />
+                </motion.div>
+              </Button>
+            </motion.div>
           </div>
         </div>
 

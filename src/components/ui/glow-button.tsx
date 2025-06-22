@@ -2,20 +2,20 @@
 
 import { motion } from 'motion/react';
 
-import { cn } from '@/lib/utils.js';
+import { cn } from '@/lib/oauth.js';
 
 import { Button, type ButtonProps } from '@/components/ui/button';
 
 interface GlowButtonProps extends ButtonProps {
   glowColor?: string;
-  glowIntensity?: number;
+  glownintensity?: number;
 }
 
 export function GlowButton({
   children,
   className,
   glowColor = 'hsl(var(--primary))',
-  glowIntensity = 0.6,
+  glownintensity = 0.6,
   ...props
 }: GlowButtonProps) {
   return (
@@ -28,7 +28,7 @@ export function GlowButton({
           opacity: 0
         }}
         animate={{
-          opacity: [0, glowIntensity, 0]
+          opacity: [0, glownintensity, 0]
         }}
         transition={{
           duration: 2,

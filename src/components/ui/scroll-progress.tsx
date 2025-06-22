@@ -3,7 +3,7 @@
 import { motion, useScroll, useSpring } from 'framer-motion';
 import type { RefObject } from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/oauth';
 
 interface ScrollProgressProps {
   className?: string;

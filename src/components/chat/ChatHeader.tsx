@@ -3,7 +3,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { MessageSquare, Settings, User } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/contexts/auth-context';
@@ -30,7 +29,6 @@ export function ChatHeader({
 }: ChatHeaderProps) {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const [isHovered, setIsHovered] = useState(false);
 
   const handleLogoClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -50,7 +48,7 @@ export function ChatHeader({
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
     >
-      <div className="absolute inset-x-[5%] top-4 w-[90%]">
+      <div className="fixed inset-x-[5%] top-4 w-[90%] z-40">
         <motion.div
           className="relative backdrop-blur-xl border rounded-2xl shadow-2xl overflow-hidden"
           style={{
@@ -59,21 +57,7 @@ export function ChatHeader({
           }}
           whileHover={{ scale: 1.01 }}
           transition={{ duration: 0.2 }}
-          onHoverStart={() => setIsHovered(true)}
-          onHoverEnd={() => setIsHovered(false)}
         >
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(to right, color-mix(in srgb, var(--main-color) 10%, transparent), transparent, color-mix(in srgb, var(--main-color) 10%, transparent))`
-            }}
-            animate={{
-              opacity: isHovered ? 1 : 0,
-              scale: isHovered ? 1 : 0.8
-            }}
-            transition={{ duration: 0.3 }}
-          />
-
           <AnimatePresence mode="wait">
             {isAiThinking && (
               <motion.div
@@ -183,29 +167,68 @@ export function ChatHeader({
                   <GlowButton
                     variant="ghost"
                     size="icon"
-                    className="relative h-10 w-10 rounded-full bg-muted border border-border hover:bg-accent transition-all duration-200"
+                    className="relative h-10 w-10 rounded-full bg-transparent border border-border hover:bg-transparent transition-all duration-200"
+                    style={{
+                      backgroundColor: 'var(--sub-alt-color)',
+                      borderColor: 'var(--sub-color)'
+                    }}
                     glowColor={`color-mix(in srgb, var(--main-color) 20%, transparent)`}
-                    glowIntensity={0.7}
+                    glownintensity={0.7}
                   >
-                    <div className="h-6 w-6 rounded-full bg-accent/20 flex items-center justify-center">
-                      <User className="h-4 w-4 text-accent-foreground" />
-                    </div>
+                    <motion.div
+                      className="h-6 w-6 rounded-full flex items-center justify-center"
+                      style={{
+                        backgroundColor: 'color-mix(in srgb, var(--main-color) 20%, transparent)'
+                      }}
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <motion.div whileHover={{ scale: 1.1 }} transition={{ duration: 0.2 }}>
+                        <User className="h-4 w-4" style={{ color: 'var(--main-color)' }} />
+                      </motion.div>
+                    </motion.div>
                   </GlowButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="bg-background/95 backdrop-blur-xl border-border text-foreground"
+                  className="backdrop-blur-xl border"
+                  style={{
+                    backgroundColor: 'var(--bg-color)',
+                    borderColor: 'var(--sub-color)',
+                    color: 'var(--text-color)'
+                  }}
                 >
-                  <DropdownMenuItem className="text-foreground hover:bg-accent">
-                    <Settings className="mr-2 h-4 w-4" />
-                    settings
+                  <DropdownMenuItem
+                    className="hover:bg-transparent focus:bg-transparent data-[highlighted]:bg-transparent cursor-pointer"
+                    style={{ color: 'var(--text-color)' }}
+                  >
+                    <motion.div
+                      className="flex items-center"
+                      whileHover={{ x: 2 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      <motion.span whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
+                        settings
+                      </motion.span>
+                    </motion.div>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="text-foreground hover:bg-accent"
+                    className="hover:bg-transparent focus:bg-transparent data-[highlighted]:bg-transparent cursor-pointer"
+                    style={{ color: 'var(--text-color)' }}
                   >
-                    <User className="mr-2 h-4 w-4" />
-                    sign out
+                    <motion.div
+                      className="flex items-center"
+                      whileHover={{ x: 2 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <motion.span whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
+                        sign out
+                      </motion.span>
+                    </motion.div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

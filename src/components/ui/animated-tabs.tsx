@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 
-import { cn } from '@/lib/utils.js';
+import { cn } from '@/lib/oauth.js';
 
 interface AnimatedTabsProps {
   tabs: { label: string }[];

@@ -4,7 +4,7 @@ import { PanelLeft } from 'lucide-react';
 import * as React from 'react';
 
 import { useSidebar } from '@/hooks/use-sidebar';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/oauth';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

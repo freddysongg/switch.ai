@@ -89,7 +89,7 @@ export class ToastService {
     }
 
     const delaySeconds = Math.ceil(delayMs / 1000);
-    const message = `Retrying in ${delaySeconds}s (attempt ${attemptNumber})`;
+    const message = `retrying in ${delaySeconds}s (attempt ${attemptNumber})`;
 
     this.retryToastId = this.loading(message);
 
@@ -99,7 +99,7 @@ export class ToastService {
       if (remainingSeconds > 0 && this.retryToastId) {
         this.update(
           this.retryToastId,
-          `Retrying in ${remainingSeconds}s (attempt ${attemptNumber})`,
+          `retrying in ${remainingSeconds}s (attempt ${attemptNumber})`,
           'loading'
         );
       } else {
@@ -122,7 +122,7 @@ export class ToastService {
       this.dismiss(this.rateLimitToastId);
     }
 
-    const message = `Rate limited. Retry in ${retryAfterSeconds}s`;
+    const message = `rate limited. retry in ${retryAfterSeconds}s`;
 
     this.rateLimitToastId = this.warning(message, retryAfterSeconds * 1000);
 
@@ -132,7 +132,7 @@ export class ToastService {
       if (remainingSeconds > 0 && this.rateLimitToastId) {
         this.update(
           this.rateLimitToastId,
-          `Rate limited. Retry in ${remainingSeconds}s`,
+          `rate limited. retry in ${remainingSeconds}s`,
           'warning'
         );
       } else {
@@ -152,7 +152,7 @@ export class ToastService {
    */
   static showQueueStatus(queueSize: number, activeRequests: number): string | number {
     if (queueSize === 0 && activeRequests === 0) {
-      return this.success('All requests completed');
+      return this.success('all requests completed');
     }
 
     const message =
@@ -169,16 +169,81 @@ export class ToastService {
   static showAuthEvent(type: 'login' | 'logout' | 'refresh' | 'expired'): string | number {
     switch (type) {
       case 'login':
-        return this.success('Successfully logged in');
+        return this.success('successfully logged in');
       case 'logout':
-        return this.info('Logged out');
+        return this.info('logged out');
       case 'refresh':
-        return this.info('Session refreshed', 2000);
+        return this.info('session refreshed', 2000);
       case 'expired':
-        return this.warning('Session expired. Please log in again');
+        return this.warning('session expired. please log in again');
       default:
-        return this.info('Authentication event');
+        return this.info('authentication event');
     }
+  }
+
+  /**
+   * Show notification for Google OAuth events
+   */
+  static showGoogleAuthEvent(
+    type: 'initiate' | 'success' | 'cancelled' | 'failed'
+  ): string | number {
+    switch (type) {
+      case 'initiate':
+        return this.loading('redirecting to google...');
+      case 'success':
+        return this.success('successfully signed in with google');
+      case 'cancelled':
+        return this.info('google sign-in was cancelled');
+      case 'failed':
+        return this.error('google sign-in failed. please try again.');
+      default:
+        return this.info('google authentication event');
+    }
+  }
+
+  /**
+   * Handle Google OAuth specific errors with appropriate notifications
+   */
+  static handleGoogleOAuthError(
+    error: Error,
+    context: 'initiate' | 'callback' = 'callback'
+  ): string | number {
+    const errorMessage = error.message.toLowerCase();
+
+    if (errorMessage.includes('popup') && errorMessage.includes('blocked')) {
+      return this.warning('please allow popups for google sign-in to work', 8000);
+    }
+
+    if (errorMessage.includes('access_denied') || errorMessage.includes('cancelled')) {
+      return this.showGoogleAuthEvent('cancelled');
+    }
+
+    if (errorMessage.includes('invalid_request') || errorMessage.includes('invalid_grant')) {
+      return this.error(
+        'invalid google authentication request. please try signing in again.',
+        6000
+      );
+    }
+
+    if (errorMessage.includes('network') || errorMessage.includes('connection')) {
+      return this.error(
+        'network error during google sign-in. please check your connection and try again.',
+        6000
+      );
+    }
+
+    if (errorMessage.includes('timeout')) {
+      return this.error('google sign-in timed out. please try again.', 5000);
+    }
+
+    if (context === 'initiate') {
+      return this.error(
+        'failed to start google sign-in. please refresh the page and try again.',
+        6000
+      );
+    }
+
+    return this.error('google sign-in failed. please try again or use email/password login.', 6000);
   }
 
   /**
@@ -190,7 +255,7 @@ export class ToastService {
     }
 
     if (error instanceof ValidationError) {
-      return this.warning(showDetail ? error.message : 'Please check your input', 5000);
+      return this.warning(showDetail ? error.message : 'please check your input', 5000);
     }
 
     if (error instanceof RateLimitError) {
@@ -198,21 +263,21 @@ export class ToastService {
     }
 
     if (error instanceof AuthenticationError) {
-      return this.warning('Please log in to continue', 6000);
+      return this.warning('please log in to continue', 6000);
     }
 
     if (error instanceof ApiError) {
       const message =
         error.status && error.status >= 500
-          ? 'Server error. Please try again later.'
+          ? 'server error. please try again later.'
           : showDetail
             ? error.message
-            : 'Request failed';
+            : 'request failed';
 
       return this.error(message, 5000);
     }
 
-    return this.error(showDetail ? error.message : 'An unexpected error occurred', 5000);
+    return this.error(showDetail ? error.message : 'an unexpected error occurred', 5000);
   }
 
   /**
@@ -221,13 +286,13 @@ export class ToastService {
   static showConnectionStatus(status: 'online' | 'offline' | 'reconnecting'): string | number {
     switch (status) {
       case 'online':
-        return this.success('Back online', 3000);
+        return this.success('back online', 3000);
       case 'offline':
-        return this.error('Connection lost');
+        return this.error('connection lost');
       case 'reconnecting':
-        return this.loading('Reconnecting...');
+        return this.loading('reconnecting...');
       default:
-        return this.info('Connection status changed');
+        return this.info('connection status changed');
     }
   }
 
@@ -236,7 +301,7 @@ export class ToastService {
    */
   static showUploadProgress(filename: string, progress: number): string | number {
     const message =
-      progress < 100 ? `Uploading ${filename}: ${progress}%` : `Upload complete: ${filename}`;
+      progress < 100 ? `uploading ${filename}: ${progress}%` : `upload complete: ${filename}`;
 
     return progress < 100 ? this.loading(message) : this.success(message, 3000);
   }

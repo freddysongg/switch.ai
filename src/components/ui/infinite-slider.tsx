@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import * as React from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/oauth';
 
 interface InfiniteSliderProps {
   children?: React.ReactNode;

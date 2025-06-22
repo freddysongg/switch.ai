@@ -13,7 +13,6 @@ import { AnimatedTags } from '@/components/ui/animated-tags';
 import { BorderTrail } from '@/components/ui/border-trail';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { GlowButton } from '@/components/ui/glow-button';
 import { InViewSection } from '@/components/ui/in-view-section';
 import { InfiniteSlider } from '@/components/ui/infinite-slider';
 import { Input } from '@/components/ui/input';
@@ -73,26 +72,27 @@ export default function LandingPage() {
 
               <AnimatedTags tags={['for gamers', 'for typists', 'for enthusiasts']} />
 
-              <motion.div
-                className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 1.5 }}
-              >
-                <GlowButton
-                  size="lg"
-                  onClick={handleTryTheApp}
-                  className="text-base px-8"
-                  style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{ willChange: 'transform' }}
                 >
-                  try the app
-                </GlowButton>
+                  <Button
+                    size="lg"
+                    onClick={handleTryTheApp}
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 text-sm rounded-lg font-medium"
+                    style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
+                  >
+                    try the app
+                  </Button>
+                </motion.div>
                 <Button variant="link" size="lg" asChild className="text-base text-foreground">
                   <motion.a href="#features" whileHover={{ x: 5 }}>
                     learn more <ArrowRight className="ml-2 h-4 w-4" />
                   </motion.a>
                 </Button>
-              </motion.div>
+              </div>
               <motion.div
                 className="pt-16"
                 initial={{ opacity: 0 }}
@@ -249,15 +249,21 @@ export default function LandingPage() {
                   className="flex-1 min-w-[200px] text-base"
                   aria-label="email for sign up"
                 />
-                <GlowButton
-                  onClick={handleGetStartedWithEmail}
-                  size="lg"
-                  className="w-full sm:w-auto text-base"
-                  glowIntensity={0.8}
-                  style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{ willChange: 'transform' }}
                 >
-                  get started
-                </GlowButton>
+                  <Button
+                    onClick={handleGetStartedWithEmail}
+                    size="lg"
+                    className="w-full sm:w-auto text-base"
+                    glownintensity={0.8}
+                    style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
+                  >
+                    get started
+                  </Button>
+                </motion.div>
               </div>
             </div>
           </div>

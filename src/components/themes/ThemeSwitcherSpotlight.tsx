@@ -3,8 +3,8 @@
 import { Palette } from 'lucide-react';
 import * as React from 'react';
 
-import { applyTheme, AppTheme, availableAppThemes, themeColorPreviews } from '@/lib/themeService';
-import { cn } from '@/lib/utils.js';
+import { cn } from '@/lib/oauth.js';
+import { applyTheme, AppTheme, availableAppThemes, themeColorPreviews } from '@/lib/ThemeService';
 
 import {
   Command,
@@ -86,7 +86,7 @@ export function ThemeSwitcherSpotlight() {
         className="flex items-center gap-2 px-2 sm:px-3 font-mono text-xs sm:text-sm text:text-color"
         style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
         glowColor={`color-mix(in srgb, var(--main-color) 15%, transparent)`}
-        glowIntensity={0.6}
+        glownintensity={0.6}
       >
         <Palette className="h-4 w-4" />
         <span className="hidden sm:inline">{activeThemeName}</span>

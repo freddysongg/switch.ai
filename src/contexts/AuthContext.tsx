@@ -3,7 +3,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { authApi } from '@/lib/api.js';
 import { AuthService, TokenData } from '@/lib/auth/AuthService';
 
-import { AuthResponse } from '@/types/auth.js';
+import { AuthResponse, GoogleOAuthCallbackParams } from '@/types/auth.js';
 import { User } from '@/types/chat.js';
 
 import { apiClient, ApiClientContext } from './api-client-context';
@@ -24,7 +24,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setCurrentUser(user as User | null);
     setAuthToken(token);
 
-    // Construct tokenData from available information
     if (user && token) {
       const expiresAt =
         authService.getTokenExpiration()?.getTime() || Date.now() + 24 * 60 * 60 * 1000;
@@ -91,6 +90,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await authApi.register({ email, password: pass, name });
   };
 
+  const loginWithGoogle = () => {
+    try {
+      authService.loginWithGoogle();
+    } catch (error) {
+      console.error('Google OAuth initiation failed:', error);
+      throw error;
+    }
+  };
+
+  const handleGoogleCallback = async (params: GoogleOAuthCallbackParams) => {
+    try {
+      setIsLoading(true);
+      await authService.handleGoogleCallback(params);
+    } catch (error) {
+      console.error('Google OAuth callback failed:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const authenticateWithToken = async (token: string) => {
+    try {
+      setIsLoading(true);
+      await authService.authenticateWithToken(token);
+    } catch (error) {
+      console.error('Token authentication failed:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     authService.logout();
   };
@@ -122,6 +154,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           isLoading,
           login,
           register,
+          loginWithGoogle,
+          handleGoogleCallback,
+          authenticateWithToken,
           logout,
           isAdmin,
           refreshToken,
