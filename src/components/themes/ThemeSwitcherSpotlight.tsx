@@ -9,7 +9,7 @@ import {
   AppTheme,
   availableAppThemes,
   themeColorPreviews
-} from '@/lib/ThemeService.js';
+} from '@/lib/themeService.js';
 
 import {
   Command,
@@ -155,7 +155,7 @@ export function ThemeSwitcherSpotlight() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5">
-                          {Object.values(colors || {}).map((color: string, index: number) => (
+                          {(Object.values(colors || {}) as string[]).map((color, index) => (
                             <div
                               key={index}
                               className="w-3 h-3 rounded-full border border-border/50 transition-transform duration-200 hover:scale-125"
