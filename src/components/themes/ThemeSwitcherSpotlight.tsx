@@ -39,7 +39,7 @@ export function ThemeSwitcherSpotlight() {
     const initializeTheme = () => {
       const savedThemeId = localStorage.getItem('switch-ai-theme');
       let initialThemeId = savedThemeId;
-      if (!initialThemeId || !availableAppThemes.some((t) => t.id === initialThemeId)) {
+      if (!initialThemeId || !availableAppThemes.some((t: AppTheme) => t.id === initialThemeId)) {
         initialThemeId = 'dark';
       }
       applyTheme(initialThemeId);
@@ -80,7 +80,7 @@ export function ThemeSwitcherSpotlight() {
     return () => document.removeEventListener('keydown', down);
   }, []);
 
-  const activeTheme = availableAppThemes.find((t) => t.id === activeThemeId);
+  const activeTheme = availableAppThemes.find((t: AppTheme) => t.id === activeThemeId);
   const activeThemeName = activeTheme?.name || 'select theme';
 
   return (
@@ -138,7 +138,7 @@ export function ThemeSwitcherSpotlight() {
                     available themes
                   </p>
                 </div>
-                {availableAppThemes.map((theme) => {
+                {availableAppThemes.map((theme: AppTheme) => {
                   const colors = getThemePreviewColors(theme.id);
                   return (
                     <CommandItem
@@ -155,7 +155,7 @@ export function ThemeSwitcherSpotlight() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5">
-                          {Object.values(colors || {}).map((color, index) => (
+                          {Object.values(colors || {}).map((color: string, index: number) => (
                             <div
                               key={index}
                               className="w-3 h-3 rounded-full border border-border/50 transition-transform duration-200 hover:scale-125"
