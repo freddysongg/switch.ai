@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { ToastService } from '@/lib/ToastService';
+import { ToastService } from '@/lib/ToastService.js';
 
 export function useToastNotifications() {
   const showSuccess = useCallback((message: string, duration?: number) => {

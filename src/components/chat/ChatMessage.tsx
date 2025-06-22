@@ -6,12 +6,12 @@ import { useEffect, useState } from 'react';
 
 import { cn } from '@/lib/oauth.js';
 
-import type { ComparisonSwitchData } from '@/types/api';
-import type { ChatMessage as ChatMessageType, StructuredContent, User } from '@/types/chat';
+import type { ComparisonSwitchData } from '@/types/api.js';
+import type { ChatMessage as ChatMessageType, StructuredContent, User } from '@/types/chat.js';
 
 import { Badge } from '@/components/ui/badge.js';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TransitionPanel } from '@/components/ui/transition-panel';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.js';
+import { TransitionPanel } from '@/components/ui/transition-panel.js';
 
 export interface ChatMessageProps {
   message: ChatMessageType;

@@ -3,16 +3,16 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
-import { AuthProvider } from '@/contexts/AuthContext';
-import { loadSavedTheme } from '@/lib/ThemeService';
+import { AuthProvider } from '@/contexts/AuthContext.js';
+import { loadSavedTheme } from '@/lib/ThemeService.js';
 
-import { Toaster as SonnerToaster } from '@/components/ui/sonner';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster as SonnerToaster } from '@/components/ui/sonner.js';
+import { Toaster } from '@/components/ui/toaster.js';
 import { ThemeProvider } from '@/components/themes/ThemeProvider.js';
 
 import './App.css';
 
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/contexts/auth-context.js';
 
 const AboutPage = lazy(() => import('@/app/about/page'));
 const ChatInterface = lazy(() => import('@/app/chat/page'));

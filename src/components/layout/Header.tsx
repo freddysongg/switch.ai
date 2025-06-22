@@ -5,9 +5,9 @@ import { Menu, UserCircle } from 'lucide-react';
 import * as React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/contexts/auth-context.js';
 
-import { BorderTrail } from '@/components/ui/border-trail';
+import { BorderTrail } from '@/components/ui/border-trail.js';
 import { Button } from '@/components/ui/button.js';
 import {
   DropdownMenu,
@@ -15,8 +15,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu.js';
-import { ScrollProgress } from '@/components/ui/scroll-progress';
-import { SmoothScrollLink } from '@/components/ui/smooth-scroll-link';
+import { ScrollProgress } from '@/components/ui/scroll-progress.js';
+import { SmoothScrollLink } from '@/components/ui/smooth-scroll-link.js';
 import { ThemeSwitcherSpotlight } from '@/components/themes/ThemeSwitcherSpotlight.js';
 
 export const Header = React.memo(function Header() {

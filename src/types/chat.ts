@@ -1,4 +1,4 @@
-import { AnalysisResponse } from './api';
+import { AnalysisResponse } from './api.js';
 
 export type UserRole = 'user' | 'assistant';
 

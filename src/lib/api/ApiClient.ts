@@ -11,7 +11,7 @@
  * - Toast notifications for user feedback
  */
 
-import { ToastService } from '@/lib/ToastService';
+import { ToastService } from '@/lib/ToastService.js';
 
 export interface ApiClientConfig {
   baseURL: string;

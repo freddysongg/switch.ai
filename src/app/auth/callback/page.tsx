@@ -2,15 +2,15 @@ import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { useAuth } from '@/contexts/auth-context';
+import { useAuth } from '@/contexts/auth-context.js';
 import {
   cleanOAuthParamsFromUrl,
   parseGoogleOAuthCallback,
   validateGoogleOAuthCallback
-} from '@/lib/utils';
+} from '@/lib/utils.js';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button.js';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.js';
 
 export function GoogleCallbackPage() {
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');

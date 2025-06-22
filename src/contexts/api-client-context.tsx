@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import { ApiClient } from '@/lib/api/ApiClient';
+import { ApiClient } from '@/lib/api/ApiClient.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 

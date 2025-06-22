@@ -13,7 +13,7 @@ import { useRef, useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile.js';
 import { cn } from '@/lib/oauth.js';
 
-import { ConversationListProps, ConversationSidebarProps } from '@/types/chat';
+import { ConversationListProps, ConversationSidebarProps } from '@/types/chat.js';
 
 import { Button } from '@/components/ui/button.js';
 import { Input } from '@/components/ui/input.js';

@@ -1,13 +1,13 @@
 import { ReactNode, useEffect, useState } from 'react';
 
 import { authApi } from '@/lib/api.js';
-import { AuthService, TokenData } from '@/lib/auth/AuthService';
+import { AuthService, TokenData } from '@/lib/auth/AuthService.js';
 
 import { AuthResponse, GoogleOAuthCallbackParams } from '@/types/auth.js';
 import { User } from '@/types/chat.js';
 
-import { apiClient, ApiClientContext } from './api-client-context';
-import { AuthContext } from './auth-context';
+import { apiClient, ApiClientContext } from './api-client-context.js';
+import { AuthContext } from './auth-context.js';
 
 const authService = AuthService.getInstance(apiClient);
 

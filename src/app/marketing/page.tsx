@@ -7,17 +7,17 @@ import { Link, useNavigate } from 'react-router-dom';
 
 // import { useAuth } from '@/contexts/auth-context';
 
-import { Footer } from '@/components/layout/Footer';
-import { Header } from '@/components/layout/Header';
-import { AnimatedTags } from '@/components/ui/animated-tags';
-import { BorderTrail } from '@/components/ui/border-trail';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { InViewSection } from '@/components/ui/in-view-section';
-import { InfiniteSlider } from '@/components/ui/infinite-slider';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { TransitionPanel } from '@/components/ui/transition-panel';
+import { Footer } from '@/components/layout/Footer.js';
+import { Header } from '@/components/layout/Header.js';
+import { AnimatedTags } from '@/components/ui/animated-tags.js';
+import { BorderTrail } from '@/components/ui/border-trail.js';
+import { Button } from '@/components/ui/button.js';
+import { Card, CardContent } from '@/components/ui/card.js';
+import { InViewSection } from '@/components/ui/in-view-section.js';
+import { InfiniteSlider } from '@/components/ui/infinite-slider.js';
+import { Input } from '@/components/ui/input.js';
+import { Separator } from '@/components/ui/separator.js';
+import { TransitionPanel } from '@/components/ui/transition-panel.js';
 
 export default function LandingPage() {
   const [email, setEmail] = useState('');

@@ -3,9 +3,9 @@
 import { Eye, Lock, Mail, Shield, Users } from 'lucide-react';
 import { useEffect } from 'react';
 
-import { Footer } from '@/components/layout/Footer';
-import { Header } from '@/components/layout/Header';
-import { Button } from '@/components/ui/button';
+import { Footer } from '@/components/layout/Footer.js';
+import { Header } from '@/components/layout/Header.js';
+import { Button } from '@/components/ui/button.js';
 
 const useFadeInAnimation = () => {
   useEffect(() => {

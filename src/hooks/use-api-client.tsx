@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 
-import { ApiClientContext } from '@/contexts/api-client-context';
-import { ApiClient } from '@/lib/api/ApiClient';
+import { ApiClientContext } from '@/contexts/api-client-context.js';
+import { ApiClient } from '@/lib/api/ApiClient.js';
 
 /**
  * Custom hook to access the authenticated ApiClient instance

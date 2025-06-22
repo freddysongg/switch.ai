@@ -6,7 +6,7 @@ import {
   RateLimitError,
   SecurityViolationError,
   ValidationError
-} from '@/lib/api/ApiClient';
+} from '@/lib/api/ApiClient.js';
 
 export class ToastService {
   private static retryToastId: string | number | null = null;

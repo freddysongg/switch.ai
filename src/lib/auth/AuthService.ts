@@ -8,8 +8,8 @@
  * - Integration with ApiClient for authenticated requests
  */
 
-import { ApiClient, AuthenticationError } from '../api/ApiClient';
-import { ToastService } from '../ToastService';
+import { ApiClient, AuthenticationError } from '../api/ApiClient.js';
+import { ToastService } from '../ToastService.js';
 
 export interface TokenData {
   token: string;
