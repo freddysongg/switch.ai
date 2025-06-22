@@ -127,7 +127,7 @@ export function WelcomePage({ onSendMessage, isLoading }: WelcomePageProps) {
               disabled={isLoading}
               onClick={handleSend}
               glowColor={`color-mix(in srgb, var(--main-color) 10%, transparent)`}
-              glowintensity={0.8}
+              glowIntensity={0.8}
             >
               <motion.div
                 className="absolute inset-0"

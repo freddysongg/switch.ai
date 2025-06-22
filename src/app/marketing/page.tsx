@@ -258,7 +258,7 @@ export default function LandingPage() {
                     onClick={handleGetStartedWithEmail}
                     size="lg"
                     className="w-full sm:w-auto text-base"
-                    glowintensity={0.8}
+                    glowIntensity={0.8}
                     style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
                   >
                     get started

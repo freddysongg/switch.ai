@@ -86,7 +86,7 @@ export function ThemeSwitcherSpotlight() {
         className="flex items-center gap-2 px-2 sm:px-3 font-mono text-xs sm:text-sm text:text-color"
         style={{ backgroundColor: 'var(--sub-color)', color: 'var(--sub-alt-color)' }}
         glowColor={`color-mix(in srgb, var(--main-color) 15%, transparent)`}
-        glowintensity={0.6}
+        glowIntensity={0.6}
       >
         <Palette className="h-4 w-4" />
         <span className="hidden sm:inline">{activeThemeName}</span>
